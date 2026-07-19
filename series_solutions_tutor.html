@@ -7,14 +7,27 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <link rel="stylesheet" href="shared/tutor-core.css">
     <link rel="stylesheet" href="forged.css">
+    <link rel="stylesheet" href="step-player.css">
     <style>
       /* Page-local: full-bleed forged-kit chrome; content column moves to <main> */
       body.fk-page { max-width: none; padding: 0; }
       .tutor-main { flex: 1; width: 100%; max-width: 920px; margin: 0 auto; padding: 2rem; }
+
+      /* Walkthrough mode (additive; inert unless .walkthrough-active is set) */
+      .wt-hidden { display: none !important; }
+      .walkthrough-panel { display: none; }
+      .question-card.walkthrough-active .walkthrough-panel {
+        display: block;
+        margin: 1.25rem 0;
+        padding: 1rem;
+        border: 1px solid var(--fk-border-soft, rgba(127, 127, 127, 0.25));
+        border-radius: 8px;
+      }
     </style>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="shared/tutor-core.js"></script>
+    <script src="step-player.js"></script>
 </head>
 <body class="fk-page">
 
@@ -482,6 +495,162 @@ const PROBLEMS = [
   }
 ];
 
+// ===== Walkthrough mode (FkStepPlayer, additive on top of TutorCore) =====
+// Concept links: every URL curl-verified HTTP 200 (2026-07-19).
+const WT_CONCEPTS = {
+  'power-series': { label: 'Power series review', url: 'https://tutorial.math.lamar.edu/Classes/DE/PowerSeries.aspx' },
+  'series-solutions': { label: 'Series solutions method', url: 'https://tutorial.math.lamar.edu/Classes/DE/SeriesSolutions.aspx' },
+  'recurrence-relation': { label: 'Recurrence relations', url: 'https://en.wikipedia.org/wiki/Recurrence_relation' },
+  'ordinary-singular-points': { label: 'Ordinary vs. singular points', url: 'https://en.wikipedia.org/wiki/Regular_singular_point' },
+  'radius-of-convergence': { label: 'Radius of convergence', url: 'https://en.wikipedia.org/wiki/Radius_of_convergence' },
+  'cauchy-euler': { label: 'Cauchy–Euler equations', url: 'https://tutorial.math.lamar.edu/Classes/DE/EulerEquations.aspx' },
+  'wronskian': { label: 'Wronskian & fundamental sets', url: 'https://tutorial.math.lamar.edu/Classes/DE/FundamentalSetsofSolutions.aspx' }
+};
+
+// Deterministic keyword rules: applied to step label + why, in this fixed order.
+const WT_CONCEPT_RULES = [
+  ['power-series', /power series|ansatz|re-?index/i],
+  ['recurrence-relation', /recurrence/i],
+  ['ordinary-singular-points', /ordinary point|singular point/i],
+  ['radius-of-convergence', /radius of convergence|ratio test/i],
+  ['cauchy-euler', /euler|indicial/i],
+  ['wronskian', /wronskian|fundamental set/i]
+];
+
+// Problem data uses single-$ inline delimiters (TutorCore config); the player's
+// KaTeX pass only enables $$, \[..\], \(..\). Convert $..$ -> \(..\), leave $$..$$.
+function wtMath(html) {
+  if (!html) return '';
+  return String(html).split(/(\$\$[\s\S]*?\$\$)/g).map(function (seg) {
+    if (seg.indexOf('$$') === 0) return seg;
+    return seg.replace(/\$([^$]+?)\$/g, '\\($1\\)');
+  }).join('');
+}
+
+// Player titles are set via textContent (no KaTeX); strip tags and $ delimiters.
+function wtPlainTitle(html) {
+  return String(html).replace(/<[^>]*>/g, '').replace(/\$/g, '');
+}
+
+function wtStepConcepts(step) {
+  const text = step.label + ' ' + (step.why || '');
+  return WT_CONCEPT_RULES
+    .filter(function (rule) { return rule[1].test(text); })
+    .map(function (rule) { return rule[0]; })
+    .slice(0, 3);
+}
+
+// buildStepScript(problem) -> StepScript (PLAYER.md). Deterministic: derived
+// solely from the problem object; stable ids, stable ordering.
+function buildStepScript(problem) {
+  const steps = problem.steps.map(function (step, idx) {
+    const highlights = [];
+    for (let j = 0; j < idx; j++) {
+      highlights.push({ target: 'step-' + j, kind: 'dim' });
+    }
+    highlights.push({ target: 'step-' + idx, kind: 'reveal' });
+    highlights.push({ target: 'step-' + idx, kind: 'focus' });
+    return {
+      id: problem.id + '-wt-' + idx,
+      title: wtPlainTitle(step.label),
+      narration: '<p><strong>' + wtMath(step.label) + '</strong></p>'
+        + (step.why
+          ? '<p>' + wtMath(step.why) + '</p>'
+          : '<p>Follow the math revealed in the card below.</p>'),
+      concepts: wtStepConcepts(step),
+      highlights: highlights
+    };
+  });
+  steps.push({
+    id: problem.id + '-wt-final',
+    title: 'Full solution',
+    narration: '<p><strong>Final answer</strong> — all steps above are now visible.</p><p>'
+      + wtMath(problem.answer) + '</p>',
+    concepts: [],
+    highlights: [
+      { target: 'answer', kind: 'reveal' },
+      { target: 'answer', kind: 'focus' }
+    ]
+  });
+  return {
+    tool: 'diffeq-tutor',
+    problemId: problem.id,
+    title: wtPlainTitle(problem.title) + ' — walkthrough',
+    concepts: WT_CONCEPTS,
+    steps: steps
+  };
+}
+
+// One walkthrough active at a time (the player binds document-wide arrow keys).
+let activeWalkthrough = null;
+
+function exitWalkthrough() {
+  if (!activeWalkthrough) return;
+  const card = activeWalkthrough.card;
+  activeWalkthrough.controller.destroy();
+  FkStepPlayer.applyHighlights(card, []);
+  card.querySelectorAll('.wt-hidden').forEach(function (n) { n.classList.remove('wt-hidden'); });
+  card.classList.remove('walkthrough-active');
+  activeWalkthrough.btn.textContent = 'Walk through this solution';
+  const quizBtn = card.querySelector('.quiz-toggle-btn[data-problem-id]');
+  if (quizBtn) quizBtn.disabled = false;
+  activeWalkthrough = null;
+}
+
+function setupWalkthrough(problem, card) {
+  // Addressable targets for FkStepPlayer.applyHighlights (data-fk-target convention).
+  card.querySelectorAll('.steps-list > .step').forEach(function (li, i) {
+    li.setAttribute('data-fk-target', 'step-' + i);
+  });
+  const answerBox = card.querySelector('.answer-box');
+  if (answerBox) answerBox.setAttribute('data-fk-target', 'answer');
+
+  // Player mount point, inert until .walkthrough-active is set on the card.
+  const panel = document.createElement('div');
+  panel.className = 'walkthrough-panel';
+  card.insertBefore(panel, card.querySelector('.steps-list'));
+
+  // Entry button — appended AFTER the quiz toggle so first-match
+  // '.quiz-toggle-btn' queries keep resolving to the original button.
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'quiz-toggle-btn walkthrough-btn';
+  btn.textContent = 'Walk through this solution';
+  card.querySelector('.card-header-right').appendChild(btn);
+
+  btn.addEventListener('click', function () {
+    if (activeWalkthrough && activeWalkthrough.card === card) {
+      exitWalkthrough();
+      return;
+    }
+    exitWalkthrough(); // close a player open on another card
+
+    // Leave quiz mode (via its own handler) so step bodies are visible,
+    // then lock the quiz toggle while the walkthrough owns visibility.
+    const quizBtn = card.querySelector('.quiz-toggle-btn[data-problem-id]');
+    if (card.classList.contains('quiz-active') && quizBtn) quizBtn.click();
+    if (quizBtn) quizBtn.disabled = true;
+
+    const script = buildStepScript(problem);
+    const lastIndex = script.steps.length - 1;
+    card.classList.add('walkthrough-active');
+
+    const controller = FkStepPlayer.mount(panel, script, {
+      render: function (step, index) {
+        const isFinal = index === lastIndex;
+        card.querySelectorAll('.steps-list > .step').forEach(function (liEl, i) {
+          liEl.classList.toggle('wt-hidden', !isFinal && i > index);
+        });
+        if (answerBox) answerBox.classList.toggle('wt-hidden', !isFinal);
+        FkStepPlayer.applyHighlights(card, step.highlights);
+      }
+    });
+
+    activeWalkthrough = { card: card, controller: controller, btn: btn };
+    btn.textContent = 'Exit walkthrough';
+  });
+}
+
 // ===== DOM Rendering & Initialization =====
 document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('problems-container');
@@ -523,15 +692,16 @@ document.addEventListener('DOMContentLoaded', function() {
     tocList.appendChild(link);
   });
 
-  // Render all problem cards
+  // Render all problem cards; walkthrough setup is additive on the returned card
   PROBLEMS.forEach((prob) => {
-    TutorCore.renderProblem(prob, container, {
+    const card = TutorCore.renderProblem(prob, container, {
       quizMode: false,
       onComplete: () => {
         updateUIProgress();
         TutorCore.updateTOC(PROBLEMS.map((p) => p.id));
       }
     });
+    setupWalkthrough(prob, card);
   });
 
   // Set up progress tracking
