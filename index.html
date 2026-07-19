@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>diffeq-tutor — Interactive Differential Equations Study Tools</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --dim: #8b949e;
+      --accent: #7c9eff;
+      --amber: #d29922;
+      --green: #3fb950;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main { flex: 1; max-width: 860px; margin: 0 auto; padding: 3rem 1.5rem 2rem; width: 100%; }
+    .badge-preview {
+      display: inline-block;
+      background: rgba(210, 153, 34, 0.15);
+      border: 1px solid var(--amber);
+      color: var(--amber);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .tagline { color: var(--dim); font-size: 1.1rem; margin-bottom: 0.75rem; }
+    .scope-note {
+      color: var(--dim);
+      font-size: 0.95rem;
+      border-left: 3px solid var(--amber);
+      padding-left: 0.9rem;
+      margin: 1.25rem 0 2.5rem;
+    }
+    .cards { display: grid; gap: 1rem; }
+    .card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card h2 { font-size: 1.15rem; margin-bottom: 0.35rem; color: var(--accent); }
+    .card p { color: var(--dim); font-size: 0.95rem; }
+    .card .meta { display: block; margin-top: 0.6rem; font-size: 0.8rem; color: var(--green); font-weight: 600; }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem;
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--dim); }
+  </style>
+</head>
+<body>
+
+<main>
+  <span class="badge-preview">EARLY PREVIEW</span>
+  <h1>diffeq-tutor</h1>
+  <p class="tagline">Interactive study tools for ordinary differential equations — worked problems with step-by-step reveal, quiz mode, and progress tracking.</p>
+  <p class="scope-note">Current scope: one topic module (series solutions near ordinary points + Cauchy&ndash;Euler equations) and one cheat sheet, built on a shared TutorCore engine. Roadmap: expand into a full course tutor. See the <a href="https://github.com/ArathIndustries/diffeq-tutor" style="color: var(--accent);">repository</a> for details.</p>
+
+  <div class="cards">
+    <a class="card" href="series_solutions_tutor.html">
+      <h2>Series Solutions &amp; Euler Equations — Interactive Tutor</h2>
+      <p>12 fully worked problems: series ansatz and re-indexing, recurrence relations, radius of convergence, Wronskian verification, singular-point classification, and all three Euler-equation root cases. Every step carries a "why" annotation.</p>
+      <span class="meta">Interactive &middot; quiz mode &middot; progress saved locally</span>
+    </a>
+    <a class="card" href="problems_series_solutions.html">
+      <h2>Series &amp; Euler — Quick Reference</h2>
+      <p>Companion reference sheet: formulas, decision tables, and condensed worked examples for the same topics. Searchable, with a print-friendly mode.</p>
+      <span class="meta">Reference &middot; searchable &middot; print mode</span>
+    </a>
+    <a class="card" href="cheatsheet_series_methods.html">
+      <h2>Higher-Order &amp; Series Methods Cheat Sheet</h2>
+      <p>Print-compact cheat sheet spanning undetermined coefficients, spring/mass systems, the power-series toolbox, the 6-step series method, and Euler cases — plus a common-confusions section.</p>
+      <span class="meta">Printable &middot; one-page layout</span>
+    </a>
+  </div>
+</main>
+
+<footer>
+  A Forged Tool &middot; &copy; Arath Industries
+</footer>
+
+</body>
+</html>

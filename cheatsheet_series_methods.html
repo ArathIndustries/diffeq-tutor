@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Higher-Order & Series Methods Cheat Sheet</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters:[{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}]});"></script>
+<style>
+  .katex-display { margin: 2px 0 !important; }
+  .katex-display > .katex { text-align: left !important; padding-left: 4px; }
+  @page { size: letter; margin: 0.2in; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11.5pt; line-height: 1.3; color: #111; padding: 0.15in; }
+  .page {
+    zoom: 0.47;
+    width: 17in;
+    column-count: 3;
+    column-gap: 0.25in;
+    column-rule: 1px solid #ccc;
+    column-fill: auto;
+    page-break-after: always;
+  }
+  h1 { font-size: 14.5pt; text-align: center; column-span: all; border-bottom: 2px solid #333; padding-bottom: 2px; margin-bottom: 4px; }
+  h2 { font-size: 12pt; background: #222; color: #fff; padding: 2px 5px; margin: 4px 0 2px 0; border-radius: 2px; break-after: avoid; break-inside: avoid; }
+  h3 { font-size: 11pt; border-bottom: 1px solid #888; margin: 3px 0 1px 0; font-weight: 700; break-after: avoid; }
+  p, li { margin: 0; font-size: 11.5pt; }
+  ul, ol { padding-left: 14px; margin: 0; }
+  li { margin: 0; }
+  .f { background: #eef2ff; border-left: 3px solid #3366cc; padding: 2px 5px; margin: 2px 0; font-size: 11.5pt; break-inside: avoid; }
+  .f2 { background: #fff7ee; border-left: 6px double #cc6633; padding: 2px 5px; margin: 2px 0; font-size: 11.5pt; break-inside: avoid; }
+  .tip { background: #efffef; border-left: 3px dashed #339933; padding: 2px 5px; margin: 2px 0; font-size: 10.5pt; break-inside: avoid; }
+  .warn { background: #fff0f0; border-left: 5px solid #cc3333; padding: 2px 5px; margin: 2px 0; font-size: 10.5pt; break-inside: avoid; }
+  /* PRINT: black-and-white friendly (since colored backgrounds and border colors won't print) */
+  @media print {
+    .f      { background: #fff !important; border-left: 2px solid #000 !important; }
+    .f2     { background: #f0f0f0 !important; border-left: 6px double #000 !important; }
+    .tip    { background: #fff !important; border-left: 3px dashed #000 !important; }
+    .warn   { background: #fff !important; border: 2px solid #000 !important; border-left-width: 6px !important; }
+    .ex     { background: #fff !important; border: 1px solid #000 !important; }
+    th      { background: #d0d0d0 !important; }
+    h2      { background: #000 !important; color: #fff !important; }
+  }
+  .vd { font-size: 9.5pt; color: #555; }
+  table { width: 100%; border-collapse: collapse; margin: 2px 0; font-size: 10pt; break-inside: avoid; table-layout: fixed; word-wrap: break-word; }
+  th, td { border: 1px solid #999; padding: 1px 3px; text-align: left; overflow: hidden; }
+  th { background: #e0e0e0; font-weight: 700; }
+  .ex { background: #f8f8f8; border: 1px solid #bbb; padding: 2px 5px; margin: 2px 0; font-size: 10.5pt; break-inside: avoid; }
+  .ex b { color: #333; }
+  .s { display: block; padding-left: 10px; }
+  b { color: #1a1a1a; }
+  .cl { margin: 0; padding-left: 14px; }
+  .cl li { margin: 0; padding: 0; }
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1 (FRONT) ==================== -->
+<div class="page">
+<h1>Higher-Order & Series Methods Cheat Sheet</h1>
+
+<h2>QUICK DECISION TREE — Which method?</h2>
+<div class="f2"><b>Look at your ODE and ask:</b>
+<ol style="margin:2px 0; padding-left:14px; font-size:10.5pt;">
+<li>Variable is \(t\) and form is \(mu'' + \gamma u' + ku = F(t)\)?
+<br>→ <b>Spring/mass</b>. Solve char eq for \(u_h\), then method of undetermined coefficients for \(u_p\). <em>(Sec 3.7–3.8)</em></li>
+<li>Variable is \(x\), form is \(x^2 y'' + \alpha x y' + \beta y = 0\)?
+<br>→ <b>Euler equation</b>. Substitute \(y = x^r\), get indicial eq, split by \(\Delta\). <em>(Sec 5.4)</em></li>
+<li>Variable is \(x\), form is \(P(x)y'' + Q(x)y' + R(x)y = 0\) with polynomial \(P, Q, R\)?
+<br>→ Check \(P(x_0)\): if \(\neq 0\), <b>Power series method</b> at ordinary point \(x_0\) <em>(Sec 5.3, 6-Step Method)</em>. If \(= 0\), <b>classify singular point</b> as regular or irregular <em>(Sec 5.4 limits test)</em>.</li>
+<li>Problem asks "find radius of convergence of \(\sum a_n x^n\)"?
+<br>→ <b>Ratio Test</b> on the series itself. <em>(Sec 5.1–5.2)</em></li>
+</ol>
+</div>
+
+<h2>ESSENTIAL TOOLS & FORMULAS</h2>
+<h3>Quadratic Formula</h3>
+<div class="f">For \(ax^2 + bx + c = 0\): \(x = \dfrac{-b \pm \sqrt{b^2-4ac}}{2a}\). <b>Discriminant:</b> \(\Delta = b^2 - 4ac\). If \(\Delta < 0\), roots are complex: \(x = \dfrac{-b \pm i\sqrt{|\Delta|}}{2a}\)</div>
+
+<h3>Extracting \(\lambda\) and \(\mu\) from Complex Roots</h3>
+<div class="f">If \(r = \alpha + \beta i\) (or roots \(\alpha \pm \beta i\)): \(\lambda = \alpha\) (real part), \(\mu = |\beta|\) (magnitude of imaginary part)</div>
+
+<h3>Method of Undetermined Coefficients (Particular Solutions)</h3>
+<div class="f"><b>For:</b> \(ay'' + by' + cy = f(t)\). <b>Guess form for \(y_p\) based on \(f(t)\):</b>
+<table style="width:100%; margin-top:2px;">
+<tr><th>\(f(t)\) looks like</th><th>Try \(y_p =\)</th></tr>
+<tr><td>\(P_n(t)\) — poly of degree \(n\)</td><td>\(A_n t^n + \ldots + A_1 t + A_0\)</td></tr>
+<tr><td>\(P_n(t) e^{rt}\)</td><td>(poly degree \(n\))\(\cdot e^{rt}\)</td></tr>
+<tr><td>\(A\cos(\omega t)\) or \(B\sin(\omega t)\)</td><td>\(C\cos(\omega t) + D\sin(\omega t)\) (BOTH!)</td></tr>
+<tr><td>\(e^{rt}[P\cos\omega t + Q\sin\omega t]\)</td><td>\(e^{rt}[C\cos\omega t + D\sin\omega t]\) (same form)</td></tr>
+</table>
+</div>
+<div class="warn"><b>⚠ Duplication rule (critical!):</b> If your guessed \(y_p\) duplicates part of the homogeneous solution \(y_h\), multiply the guess by \(t\) (or \(t^2\) for double duplication). <br><b>Examples:</b>
+<ul style="margin:2px 0; padding-left:12px; font-size:10.5pt;">
+<li>\(y_h = c_1 e^{-t}\) and \(f(t) = e^{-t}\) → try \(y_p = At\,e^{-t}\) (not \(Ae^{-t}\))</li>
+<li>\(y_h = (c_1 + c_2 t)e^{-t}\) and \(f(t) = e^{-t}\) → try \(y_p = At^2\,e^{-t}\)</li>
+<li>\(y_h = c_1\cos(2t) + c_2\sin(2t)\) and \(f(t) = 3\cos(2t)\) → try \(y_p = t[A\cos 2t + B\sin 2t]\) (resonance!)</li>
+</ul>
+</div>
+<div class="f"><b>Procedure:</b> (1) Find \(y_h\) first (you need it to check for duplication). (2) Guess \(y_p\) from the table, multiply by \(t\) or \(t^2\) if it duplicates \(y_h\). (3) Compute \(y_p', y_p''\). (4) Substitute into the ODE. (5) Match coefficients of each function type (\(\cos, \sin, e^{rt}, t^k\)). (6) Solve the system for the unknown constants.</div>
+
+<div class="tip"><b>Note:</b> Index shifting for series is in the <b>5.1–5.2 section below</b> — see the <b>Pre-Computed Power Series Table</b>. Do not re-derive; just pick off the row you need.</div>
+
+<h2>3.7–3.8 — Damped & Forced Oscillations</h2>
+<h3>Spring Equation</h3>
+<div class="f">\(mu'' + \gamma u' + ku = F(t)\), where \(m\) = mass, \(\gamma\) = damping, \(k\) = spring const, \(F(t)\) = external force.</div>
+
+<h3>Homogeneous: \(mu'' + \gamma u' + ku = 0\)</h3>
+<div class="f"><b>Characteristic equation:</b> \(mr^2 + \gamma r + k = 0\). Solve with quadratic formula: \(r = \dfrac{-\gamma \pm \sqrt{\gamma^2-4mk}}{2m}\). The sign of the discriminant \(\gamma^2 - 4mk\) decides the case.</div>
+
+<div class="f2"><b>Step-by-step:</b>
+<ol style="margin:2px 0; padding-left:16px; font-size:10.5pt;">
+<li>Read \(m, \gamma, k\) off the ODE.</li>
+<li>Compute discriminant \(\Delta = \gamma^2 - 4mk\) to pick the case (table below).</li>
+<li>Solve the quadratic for the roots \(r\).</li>
+<li>Plug into the matching solution template.</li>
+<li>If initial conditions given, substitute \(t=0\) into \(u(t)\) and \(u'(t)\) to solve for \(c_1, c_2\).</li>
+</ol>
+</div>
+
+<table style="width:100%; margin:2px 0; font-size:10pt;">
+<tr><th>\(\Delta = \gamma^2 - 4mk\)</th><th>Case</th><th>Roots</th><th>Solution template</th></tr>
+<tr><td>\(> 0\)</td><td>Overdamped</td><td>Two distinct real \(r_1, r_2\) (both negative)</td><td>\(u = c_1 e^{r_1 t} + c_2 e^{r_2 t}\)</td></tr>
+<tr><td>\(= 0\)</td><td>Critically damped</td><td>Repeated real \(r = -\gamma/(2m)\)</td><td>\(u = (c_1 + c_2 t)\,e^{rt}\)</td></tr>
+<tr><td>\(< 0\)</td><td>Underdamped</td><td>Complex \(r = \lambda \pm \mu i\), with \(\lambda = -\gamma/(2m)\), \(\mu = \sqrt{4mk-\gamma^2}/(2m)\)</td><td>\(u = e^{\lambda t}\,(c_1 \cos\mu t + c_2 \sin\mu t)\)</td></tr>
+</table>
+
+<div class="ex"><b>Ex (Underdamped): \(u'' + 0.5\,u' + 5u = 0\)</b>
+<span class="s"><b>1. Read:</b> \(m=1, \gamma=0.5, k=5\).</span>
+<span class="s"><b>2. Discriminant:</b> \(0.25 - 20 = -19.75 < 0\) ⇒ underdamped.</span>
+<span class="s"><b>3. Roots:</b> \(r = \dfrac{-0.5 \pm \sqrt{-19.75}}{2} = -0.25 \pm 2.236\,i\). So \(\lambda = -0.25\), \(\mu = 2.236\).</span>
+<span class="s"><b>4. Plug template:</b> \(u = e^{-0.25 t}(c_1 \cos 2.236\,t + c_2 \sin 2.236\,t)\).</span></div>
+
+<div class="ex"><b>Ex (Critically damped): \(u'' + 4u' + 4u = 0\)</b>
+<span class="s"><b>1. Read:</b> \(m=1, \gamma=4, k=4\).</span>
+<span class="s"><b>2. Discriminant:</b> \(16 - 16 = 0\) ⇒ critically damped.</span>
+<span class="s"><b>3. Root:</b> \(r = -\gamma/(2m) = -2\) (repeated).</span>
+<span class="s"><b>4. Plug template:</b> \(u = (c_1 + c_2\,t)\,e^{-2t}\).</span></div>
+
+<div class="ex"><b>Ex (Overdamped): \(u'' + 5u' + 6u = 0\)</b>
+<span class="s"><b>1. Read:</b> \(m=1, \gamma=5, k=6\).</span>
+<span class="s"><b>2. Discriminant:</b> \(25 - 24 = 1 > 0\) ⇒ overdamped.</span>
+<span class="s"><b>3. Roots:</b> \(r = \dfrac{-5 \pm 1}{2} = -2\) or \(-3\).</span>
+<span class="s"><b>4. Plug template:</b> \(u = c_1 e^{-2t} + c_2 e^{-3t}\).</span></div>
+
+<h3>Applying Initial Conditions</h3>
+<div class="f"><b>Given:</b> \(u(0) = u_0\), \(u'(0) = u_1\). <b>Procedure:</b> (1) Substitute \(t=0\) into \(u(t)\) to find \(c_1\), (2) Differentiate \(u(t)\), substitute \(t=0\) into \(u'(t)\) to find \(c_2\).</div>
+<div class="ex"><b>Ex with IC:</b> \(u'' + 2u' + u = 0\), \(u(0)=1\), \(u'(0)=0\)
+<span class="s"><b>Char:</b> \(r^2+2r+1=(r+1)^2=0 \Rightarrow r=-1\) (repeated)</span>
+<span class="s"><b>Gen sol:</b> \(u=(c_1+c_2 t)e^{-t}\)</span>
+<span class="s"><b>IC1:</b> \(u(0)=c_1=1\)</span>
+<span class="s"><b>IC2:</b> \(u'(t)=c_2 e^{-t}-(c_1+c_2 t)e^{-t}\), so \(u'(0)=c_2-c_1=0 \Rightarrow c_2=1\)</span>
+<span class="s"><b>Ans:</b> \(u=(1+t)e^{-t}\)</span></div>
+
+<h3>Forced: \(mu'' + \gamma u' + ku = F_0\cos(\omega t)\)</h3>
+<div class="f"><b>General solution:</b> \(u = u_h + u_p\). Terminology: \(u_h\) = <b>&ldquo;transient solution&rdquo;</b> (dies out); \(u_p\) = <b>&ldquo;steady-state solution&rdquo;</b> (persists).</div>
+<div class="f"><b>Steady-state amplitude:</b> \(A = \dfrac{F_0}{\sqrt{(k-m\omega^{2})^{2} + (\gamma\omega)^{2}}}\); \(\tan\phi = \dfrac{\gamma\omega}{k-m\omega^{2}}\)</div>
+<div class="tip"><b>Resonance:</b> When \(\omega = \sqrt{k/m}\) (natural frequency) with \(\gamma \approx 0\), amplitude \(\to \infty\).</div>
+
+<div class="ex"><b>Ex (forced, full walkthrough): \(m=1, k=6, \gamma=2, F(t)=2\cos t\)</b>
+<span class="s"><b>Step 1 — ODE:</b> \(mu'' + \gamma u' + ku = F(t)\) ⇒ \(u'' + 2u' + 6u = 2\cos t\)</span>
+<span class="s"><b>Step 2 — Homogeneous char eq:</b> \(r^2 + 2r + 6 = 0\)</span>
+<span class="s"><b>Step 3 — Quadratic formula:</b> \(r = \dfrac{-2\pm\sqrt{4-24}}{2} = \dfrac{-2\pm\sqrt{-20}}{2} = \dfrac{-2\pm 2\sqrt{5}\,i}{2} = -1\pm\sqrt{5}\,i\). So \(\lambda=-1\), \(\mu=\sqrt 5\).</span>
+<span class="s"><b>Step 4 — Transient (homogeneous):</b> \(u_h = e^{\lambda t}(c_1\cos(\mu t) + c_2\sin(\mu t)) = e^{-t}(c_1\cos(\sqrt 5\,t) + c_2\sin(\sqrt 5\,t))\)</span>
+<span class="s"><b>Step 5 — Steady-state ansatz</b> (RHS is \(2\cos t\) with \(\omega = 1\), which is NOT a root of char eq, so no duplication): \(U = A\cos t + B\sin t\).</span>
+<span class="s"><b>Step 6 — Derivatives of ansatz:</b> \(U' = -A\sin t + B\cos t\); \(U'' = -A\cos t - B\sin t\)</span>
+<span class="s"><b>Step 7 — Build \(u''+2u'+6u\) piece by piece:</b></span>
+<span class="s">&nbsp;&nbsp;\(U'' = -A\cos t - B\sin t\)</span>
+<span class="s">&nbsp;&nbsp;\(2U' = -2A\sin t + 2B\cos t\)</span>
+<span class="s">&nbsp;&nbsp;\(6U = 6A\cos t + 6B\sin t\)</span>
+<span class="s">&nbsp;&nbsp;<b>Sum:</b> \((-A + 2B + 6A)\cos t + (-B - 2A + 6B)\sin t = (5A+2B)\cos t + (-2A+5B)\sin t\)</span>
+<span class="s"><b>Step 8 — Set equal to \(2\cos t + 0\sin t\) and match:</b></span>
+<span class="s">&nbsp;&nbsp;\(\cos t\) equation: \(5A + 2B = 2\)</span>
+<span class="s">&nbsp;&nbsp;\(\sin t\) equation: \(-2A + 5B = 0\) ⇒ \(B = \tfrac{2A}{5}\)</span>
+<span class="s">&nbsp;&nbsp;Substitute: \(5A + \tfrac{4A}{5} = 2\) ⇒ \(\tfrac{29A}{5} = 2\) ⇒ \(A = \tfrac{10}{29}\), \(B = \tfrac{4}{29}\)</span>
+<span class="s"><b>Step 9 — Steady-state:</b> \(U = \tfrac{10}{29}\cos t + \tfrac{4}{29}\sin t\)</span>
+<span class="s"><b>Step 10 — Full solution:</b> \(u(t) = e^{-t}(c_1\cos(\sqrt 5\,t) + c_2\sin(\sqrt 5\,t)) + \tfrac{10}{29}\cos t + \tfrac{4}{29}\sin t\)</span></div>
+
+<div class="ex"><b>Ex: Forced with UC — \(u'' + 2u' + u = 5\cos(t)\)</b>
+<span class="s"><b>Homogeneous:</b> \((r+1)^2=0 \Rightarrow r=-1\) (repeated) \(\Rightarrow u_h=(c_1+c_2 t)e^{-t}\)</span>
+<span class="s"><b>Particular:</b> Try \(u_p = A\cos t + B\sin t\). Then \(u_p'=-A\sin t+B\cos t\), \(u_p''=-A\cos t-B\sin t\)</span>
+<span class="s"><b>Substitute:</b> \((-A\cos t - B\sin t) + 2(-A\sin t + B\cos t) + (A\cos t + B\sin t) = 5\cos t\)</span>
+<span class="s">Collect: \(\cos t\) terms: \(-A + 2B + A = 2B = 5\). \(\sin t\) terms: \(-B - 2A + B = -2A = 0\)</span>
+<span class="s"><b>Solution:</b> \(A=0, B=\frac{5}{2} \Rightarrow u_p = \frac{5}{2}\sin t\)</span>
+<span class="s"><b>General:</b> \(u = (c_1+c_2 t)e^{-t} + \frac{5}{2}\sin t\)</span></div>
+
+<h2>5.1–5.2 — Power Series & Convergence</h2>
+
+<h3 style="color:#3366cc;">⭐ Anatomy of a Power Series (read once, then you know forever)</h3>
+<div class="f2"><b>Standard form:</b> \(\displaystyle y = \sum_{n=0}^{\infty} a_n\,(x - x_0)^n\)
+<table style="width:100%; margin-top:3px; font-size:10pt;">
+<tr><th>Piece</th><th>What it is</th></tr>
+<tr><td>\(n\)</td><td>counter (dummy variable). Runs \(0, 1, 2, 3, \ldots\)</td></tr>
+<tr><td>starts at \(n=0\)</td><td>always, unless the problem says otherwise</td></tr>
+<tr><td>\(a_n\)</td><td>the coefficient of the \(n\)-th term. Subscript matches \(n\).</td></tr>
+<tr><td>\(x - x_0\)</td><td>the &ldquo;center&rdquo; is \(x_0\). For \(x_0 = 0\), this is just \(x\).</td></tr>
+<tr><td>\((x - x_0)^n\)</td><td>the \(n\)-th power of the shift. Exponent matches \(n\).</td></tr>
+</table>
+<b>Unfolded:</b> \(y = a_0 + a_1(x-x_0) + a_2(x-x_0)^2 + a_3(x-x_0)^3 + \cdots\)
+<br><b>Key facts:</b> \(y(x_0) = a_0\) and \(y'(x_0) = a_1\). So \(a_0, a_1\) ARE the initial values \(y(x_0), y'(x_0)\).
+</div>
+<div class="tip"><b>Why subscript and exponent match:</b> By convention \(a_n\) is defined as &ldquo;the coefficient attached to \((x-x_0)^n\).&rdquo; After you do derivatives or multiply by \(x\), this matching breaks — you will see \(a_{n+1} x^n\) or \(a_n x^{n+2}\). That&rsquo;s NORMAL; the subscript is just an address.</div>
+
+<h3>Convergence via Ratio Test</h3>
+<div class="f">\(\sum a_n(x-x_0)^n\) converges for \(|x-x_0| < R\) where \(R = \dfrac{1}{\lim|a_{n+1}/a_n|}\)</div>
+<div class="f"><b>Differentiation:</b> \(\dfrac{d}{dx}\sum a_n x^n = \sum na_n x^{n-1} = \sum (n+1)a_{n+1}x^n\)</div>
+
+<div class="ex"><b>Ex: Radius of convergence — \(\sum \dfrac{n!}{2^{n}}x^{n}\)</b>
+<span class="s">\(\dfrac{a_{n+1}}{a_{n}} = \dfrac{(n+1)!}{2^{n+1}} \cdot \dfrac{2^{n}}{n!} = \dfrac{n+1}{2}\)</span>
+<span class="s">\(\lim_{n\to\infty}\dfrac{n+1}{2} = \infty \Rightarrow R = 0\)</span></div>
+
+<div class="ex"><b>Ex 2: Ratio test — \(\sum \dfrac{x^n}{n!}\)</b>
+<span class="s">\(\dfrac{a_{n+1}}{a_n} = \dfrac{1/(n+1)!}{1/n!} = \dfrac{1}{n+1} \to 0\), so \(R = \infty\) (converges everywhere)</span></div>
+
+<h3 style="color:#cc6633;">⭐⭐ PRE-COMPUTED POWER SERIES TABLE — use directly, do not re-derive</h3>
+<div class="f2"><b>Start: ansatz</b> \(y = \sum_{n=0}^{\infty} a_n (x-x_0)^n\). For \(x_0 = 0\) this is \(\sum_{n=0} a_n x^n\). All entries below are for \(x_0 = 0\); shift \(x \to (x - x_0)\) if your \(x_0 \neq 0\).
+<table style="width:100%; margin-top:3px; font-size:10pt;">
+<tr><th style="width:18%;">Expression</th><th style="width:42%;">Raw form (from diff/mult rules)</th><th style="width:40%;">Relabeled to \(x^n\) — USE THIS</th></tr>
+<tr><td>\(y\)</td><td>\(\sum_{n=0}^{\infty} a_n\,x^n\)</td><td>\(\sum_{n=0}^{\infty} a_n\,x^n\)</td></tr>
+<tr><td>\(y'\)</td><td>\(\sum_{n=1}^{\infty} n\,a_n\,x^{n-1}\)</td><td>\(\sum_{n=0}^{\infty} (n+1)\,a_{n+1}\,x^n\)</td></tr>
+<tr><td>\(y''\)</td><td>\(\sum_{n=2}^{\infty} n(n-1)\,a_n\,x^{n-2}\)</td><td>\(\sum_{n=0}^{\infty} (n+2)(n+1)\,a_{n+2}\,x^n\)</td></tr>
+<tr><td>\(xy\)</td><td>\(\sum_{n=0}^{\infty} a_n\,x^{n+1}\)</td><td>\(\sum_{n=1}^{\infty} a_{n-1}\,x^n\)</td></tr>
+<tr><td>\(x^2 y\)</td><td>\(\sum_{n=0}^{\infty} a_n\,x^{n+2}\)</td><td>\(\sum_{n=2}^{\infty} a_{n-2}\,x^n\)</td></tr>
+<tr><td>\(xy'\)</td><td>\(\sum_{n=1}^{\infty} n\,a_n\,x^n\)</td><td>\(\sum_{n=1}^{\infty} n\,a_n\,x^n\)</td></tr>
+<tr><td>\(x^2 y'\)</td><td>\(\sum_{n=0}^{\infty}(n+1)\,a_{n+1}\,x^{n+2}\)</td><td>\(\sum_{n=2}^{\infty} (n-1)\,a_{n-1}\,x^n\)</td></tr>
+<tr><td>\(xy''\)</td><td>\(\sum_{n=2}^{\infty} n(n-1)\,a_n\,x^{n-1}\)</td><td>\(\sum_{n=1}^{\infty} n(n+1)\,a_{n+1}\,x^n\)</td></tr>
+<tr><td>\(x^2 y''\)</td><td>\(\sum_{n=2}^{\infty} n(n-1)\,a_n\,x^n\)</td><td>\(\sum_{n=2}^{\infty} n(n-1)\,a_n\,x^n\)</td></tr>
+</table>
+<b>How to use:</b> pick off whichever row matches each term of the ODE, write the relabeled-form sum, then combine. No substitution needed.
+</div>
+<div class="tip"><b>Shortcut rules (if you forget the table):</b>
+<ul style="margin:2px 0; padding-left:14px; font-size:10.5pt;">
+<li><b>Each derivative</b> bumps subscript of \(a\) UP by 1, coefficient grows by a factor of the index; start stays at \(n=0\).</li>
+<li><b>Each multiplication by \(x\)</b> bumps subscript of \(a\) DOWN by 1 AND bumps starting index UP by 1.</li>
+<li><b>Apply derivatives first, then multiplications.</b> (e.g. \(xy''\) = "do \(y''\) then multiply by \(x\)".)</li>
+</ul>
+<b>Why:</b> derivative drops exponent by 1, multiplying by \(x\) raises it by 1; subscript moves opposite direction to keep the actual series unchanged — only its address changes.
+</div>
+<h3 style="color:#3366cc;">⭐ Pulling Out Low-\(n\) Terms (to combine mixed-start sums)</h3>
+<div class="f2"><b>Problem:</b> you have sums starting at different indices (e.g. one at \(n=0\), one at \(n=1\)). Cannot combine yet.
+<br><b>Fix (3 steps):</b>
+<ol style="margin:2px 0; padding-left:16px; font-size:10.5pt;">
+<li>Find the HIGHEST starting index among all your sums (call it \(N\)).</li>
+<li>From every sum that starts below \(N\), PEEL OFF the low terms (plug in \(n = 0, 1, \ldots, N-1\)) and write them as standalone numbers out front.</li>
+<li>Now every sum starts at \(N\), so they combine: \(\bigl(\text{peeled terms}\bigr) + \sum_{n=N}^{\infty}[\cdots]x^n = 0\).</li>
+</ol>
+<b>After combining:</b> each power of \(x\) (including the peeled standalone pieces) must have zero coefficient. Standalone pieces give special cases; the combined sum gives the recurrence.
+</div>
+
+<h3>Even/Odd Decoupling</h3>
+<div class="f"><b>If the recurrence jumps by 2</b> (i.e., links \(a_n\) to \(a_{n+2}\)): even-indexed \(a\)&rsquo;s depend ONLY on \(a_0\); odd-indexed ONLY on \(a_1\). So \(a_0\) and \(a_1\) are two independent &ldquo;seeds&rdquo; — pick \((1,0)\) to get \(y_1\), pick \((0,1)\) to get \(y_2\).</div>
+
+<h3 style="color:#3366cc;">⭐ Spotting the Closed-Form Pattern for \(a_k\)</h3>
+<div class="f2"><b>The method (do all 4 steps, in order):</b>
+<ol class="cl" style="padding-left:18px; font-size:10.5pt;">
+<li><b>Compute 5+ coefficients, NOT 3.</b> Three is rarely enough to see the pattern. Go to \(a_8\) or \(a_{10}\).</li>
+<li><b>Identify the SIGN pattern:</b> all positive, alternating \((-1)^k\), all negative, ...</li>
+<li><b>Identify the NUMERATOR pattern:</b> usually just \(1\), \(a_0\), or \(a_1\). Sometimes powers like \(2^k\), \(3^k\).</li>
+<li><b>Identify the DENOMINATOR pattern</b> (the hard one — use the table below).</li>
+</ol>
+<b>Then VERIFY:</b> plug \(k = 0, 1, 2\) into your formula and check it reproduces the coefficients you computed.
+</div>
+
+<div class="f"><b>Common denominator patterns to memorize:</b>
+<table style="width:100%; margin:2px 0;">
+<tr><th>What you see</th><th>Closed form</th><th>Why</th></tr>
+<tr><td>\(1, 2, 6, 24, 120, 720\)</td><td>\(k!\)</td><td>factorial</td></tr>
+<tr><td>\(2, 24, 720, 40320\)</td><td>\((2k)!\)</td><td>double-step factorial</td></tr>
+<tr><td>\(2, 4, 8, 16, 32\)</td><td>\(2^k\)</td><td>geometric, base 2</td></tr>
+<tr><td>\(3, 9, 27, 81\)</td><td>\(3^k\)</td><td>geometric, base 3</td></tr>
+<tr><td>\(2 \cdot 4 \cdot 6 \cdots (2k)\)</td><td>\(2^k\,k!\)</td><td>factor one 2 from each → \(k\) twos, leaves \(1\cdot 2\cdots k\)</td></tr>
+<tr><td>\(1 \cdot 3 \cdot 5 \cdots (2k-1)\)</td><td>\(\dfrac{(2k)!}{2^k\,k!}\)</td><td>odd double factorial</td></tr>
+<tr><td>\(3 \cdot 5 \cdot 7 \cdots (2k+1)\)</td><td>\(\dfrac{(2k+1)!}{2^k\,k!}\)</td><td>same, shifted</td></tr>
+</table>
+</div>
+
+<div class="ex"><b>Worked pattern example (from Problem 5.3 #1, Step 3c):</b>
+<span class="s">Computed: \(a_0=1,\; a_2=-\tfrac{1}{2},\; a_4=\tfrac{1}{8},\; a_6=-\tfrac{1}{48},\; a_8=\tfrac{1}{384},\; a_{10}=-\tfrac{1}{3840}\)</span>
+<span class="s"><b>1. Sign:</b> \(+, -, +, -, +, -\) → alternating → \((-1)^k\)</span>
+<span class="s"><b>2. Numerator:</b> always \(1\)</span>
+<span class="s"><b>3. Denominator:</b> \(1, 2, 8, 48, 384, 3840\). Factor: \(1, 2, 2\cdot 4, 2\cdot 4\cdot 6, 2\cdot 4\cdot 6\cdot 8, 2\cdot 4\cdot 6\cdot 8\cdot 10\) → matches \(2 \cdot 4 \cdots (2k)\) → \(2^k\,k!\)</span>
+<span class="s"><b>4. Formula:</b> \(a_{2k} = \dfrac{(-1)^k}{2^k\,k!}\)</span>
+<span class="s"><b>Verify:</b> \(k=0\): \(1/(1\cdot 1) = 1\) ✓. \(k=1\): \(-1/(2\cdot 1)= -\tfrac{1}{2}\) ✓. \(k=2\): \(1/(4\cdot 2) = \tfrac{1}{8}\) ✓.</span></div>
+
+<div class="ex"><b>Worked pattern example 2 (from Problem 5.3 #1, Step 4):</b>
+<span class="s">Computed: \(a_1=1,\; a_3=-\tfrac{1}{3},\; a_5=\tfrac{1}{15},\; a_7=-\tfrac{1}{105},\; a_9=\tfrac{1}{945}\)</span>
+<span class="s"><b>1. Sign:</b> \(+, -, +, -, +\) → \((-1)^k\) (with \(k=0\) corresponding to \(a_1\))</span>
+<span class="s"><b>2. Numerator:</b> always \(1\)</span>
+<span class="s"><b>3. Denominator:</b> \(1, 3, 15, 105, 945\). Factor: \(1, 3, 3\cdot 5, 3\cdot 5\cdot 7, 3\cdot 5\cdot 7\cdot 9\) → odd number product</span>
+<span class="s"><b>4. Formula:</b> \(a_{2k+1} = \dfrac{(-1)^k}{3 \cdot 5 \cdots (2k+1)}\) (empty product = 1 for \(k=0\))</span></div>
+
+<div class="tip"><b>Pro tips for factoring tricky denominators:</b>
+<ul style="margin:2px 0; padding-left:12px; font-size:10.5pt;">
+<li><b>If every factor has a 2 in it</b> (\(2, 4, 6, 8, \ldots\)), pull one 2 from each factor. Count how many 2's you pulled (that is \(k\)) → \(2^k \cdot (\text{smaller product})\).</li>
+<li><b>If denominators grow faster than powers</b> (like \(6, 24, 120, \ldots\)), suspect factorial \(k!\) or \((2k)!\).</li>
+<li><b>If the original denominator contains products of consecutive integers</b>, think factorial. Divide \((2k)!\) by the missing pieces: \(1\cdot 3\cdots(2k-1) = (2k)! / [2\cdot 4\cdots (2k)] = (2k)!/(2^k k!)\).</li>
+<li><b>Check for \(x^2/2\) appearing naturally:</b> many ODEs produce series where \(e^{x^2/2}\) or \(e^{-x^2/2}\) is the closed form. If you see \(2^k k!\) in the denominator with \(x^{2k}\) in the numerator, you are looking at \(\sum (x^2/2)^k / k!\) which IS the exponential series.</li>
+</ul>
+</div>
+
+<h2>5.3 — Series at Ordinary Points</h2>
+<h3>Ordinary Point Test</h3>
+<div class="f">For \(P(x)y'' + Q(x)y' + R(x)y = 0\): point \(x_0\) is ordinary if \(P(x_0) \neq 0\)</div>
+<div class="f"><b>Solution form:</b> \(y = \sum a_n(x-x_0)^n\) where \(a_0, a_1\) free, higher via recurrence. <br><b>When \(x_0 = 0\):</b> \((x-x_0)^n = x^n\), so this reduces to \(y = \sum a_n x^n\).</div>
+
+<h3 style="color:#3366cc;">⭐ 6-Step Series Method</h3>
+<div class="f2"><b>The algorithm:</b>
+<ol class="cl" style="padding-left:18px; font-size:10.5pt;">
+<li><b>Substitute & re-index.</b> Start with \(y = \sum a_n(x-x_0)^n\) (if \(x_0 = 0\), this is \(\sum a_n x^n\)). Write \(y', y''\) as series in the same power. Reindex \(xy, xy',\) etc. so every sum has the same power.</li>
+<li><b>Get the recurrence.</b> Combine sums, pull out lowest-\(n\) terms that do not align, set each coefficient to zero.</li>
+<li><b>Build \(y_1\):</b> plug in \(a_0 = 1, a_1 = 0\).</li>
+<li><b>Build \(y_2\):</b> plug in \(a_0 = 0, a_1 = 1\).</li>
+<li><b>Radius \(R\):</b> apply Ratio Test to \(y_1\) (or \(y_2\)).</li>
+<li><b>Wronskian \(W[y_1, y_2](0)\):</b> by construction, \(=\det\begin{bmatrix}1&0\\0&1\end{bmatrix}=1\neq 0\), so \(\{y_1, y_2\}\) fundamental.</li>
+</ol>
+</div>
+<div class="tip"><b>First-order exception:</b> If the ODE is first order (only \(a_0\) free), skip Steps 3, 4, 6. Do Steps 1, 2, 5 only.</div>
+
+<div class="ex"><b>⭐ Full worked example: \(y'' - xy' - y = 0\), \(x_0=0\)</b>
+<span class="s"><b>Step 1:</b> \(y = \sum a_n(x-x_0)^n = \sum a_n x^n\) (since \(x_0=0\)); \(y'' = \sum(n+2)(n+1)a_{n+2}x^n\); \(xy' = \sum na_n x^n\) (\(n\geq 1\)).</span>
+<span class="s"><b>Step 2:</b> Combine → \((2a_2 - a_0) + \sum_{n\geq 1}[(n+2)(n+1)a_{n+2} - na_n - a_n]x^n = 0\). \(\;a_2 = \dfrac{a_0}{2};\;\) for \(n\geq 1:\; a_{n+2} = \dfrac{a_n}{n+2}\).</span>
+<span class="s"><b>Step 3 (\(a_0=1, a_1=0\)):</b> \(y_1 = 1 + \dfrac{x^2}{2} + \dfrac{x^4}{2\cdot 4} + \dfrac{x^6}{2\cdot 4\cdot 6} + \cdots = \sum\dfrac{x^{2k}}{2^k k!} = e^{x^2/2}\)</span>
+<span class="s"><b>Step 4 (\(a_0=0, a_1=1\)):</b> \(y_2 = x + \dfrac{x^3}{3} + \dfrac{x^5}{3\cdot 5} + \dfrac{x^7}{3\cdot 5\cdot 7} + \cdots\)</span>
+<span class="s"><b>Step 5:</b> For \(y_1\), \(\lim\left|\dfrac{x^2}{2(k+1)}\right| = 0 < 1\) ⇒ \(R=\infty\).</span>
+<span class="s"><b>Step 6:</b> \(W[y_1, y_2](0) = \det\begin{bmatrix}1&0\\0&1\end{bmatrix} = 1 \neq 0\) ⇒ fundamental set.</span></div>
+
+<div class="ex"><b>Ex (sign-flip variant): \(y'' + xy' + y = 0\) at \(x_0=0\)</b>
+<span class="s">Same as above but with sign: recurrence \(a_{n+2} = -\dfrac{a_n}{n+2}\). \(y_1 = e^{-x^2/2}\); \(y_2 = x - \dfrac{x^3}{3} + \dfrac{x^5}{3\cdot 5} - \cdots\). \(R = \infty\), \(W(0) = 1\).</span></div>
+
+<div class="ex"><b>Ex (first order, one constant): \(y' - xy = 0\)</b>
+<span class="s">\(xy = \sum a_{n-1}x^n\) (\(n\geq 1\)). Recurrence: \(a_1 = 0,\; a_{n+1} = \dfrac{a_{n-1}}{n+1}\).</span>
+<span class="s">Odd vanish; even: \(a_{2k} = \dfrac{a_0}{2^k k!}\). <b>Ans:</b> \(y = a_0 e^{x^2/2}\).</span></div>
+
+<h3>Solving IVP with Series Method</h3>
+<div class="f"><b>Given:</b> \(y(0)=y_0\), \(y'(0)=y_1\). <b>Then:</b> \(a_0 = y_0\), \(a_1 = y_1\) directly. Use recurrence for the rest.</div>
+
+<h3>Wronskian Shortcut (Step 6)</h3>
+<div class="f">By construction: \(y_1\) has \(y_1(0)=1, y_1'(0)=0\); \(y_2\) has \(y_2(0)=0, y_2'(0)=1\). So \(W[y_1,y_2](0) = \det\begin{bmatrix}1&0\\0&1\end{bmatrix} = 1\) automatically ⇒ fundamental set.</div>
+
+<h2>5.4 — Singular Points & Euler Equations</h2>
+<h3>Singular Point Classification</h3>
+<div class="f"><b>Singular point:</b> \(P(x_0)=0\) and at least one of \(Q(x_0), R(x_0) \neq 0\)</div>
+<div class="f"><b>Regular singular:</b> Both \(\lim_{x\to x_0}(x-x_0)\dfrac{Q}{P}\) and \(\lim(x-x_0)^2\dfrac{R}{P}\) are finite.</div>
+
+<div class="ex"><b>⭐ Ex: Classify \(x^2 y'' + xy' + (x^2-4)y = 0\)</b>
+<span class="s">\(P = x^2\), \(Q = x\), \(R = x^2-4\). Singular at \(x=0\).</span>
+<span class="s">Normalize: \(y'' + \dfrac{x}{x^2}y' + \dfrac{x^2-4}{x^2}y = 0\). Test limits:</span>
+<span class="s">\(\lim_{x\to 0}x\cdot\dfrac{x}{x^2} = \lim\dfrac{x^2}{x^2} = 1\) ✓</span>
+<span class="s">\(\lim_{x\to 0}x^2\cdot\dfrac{x^2-4}{x^2} = \lim(x^2-4) = -4\) ✓</span>
+<span class="s">Both finite ⇒ \(x=0\) is <b>regular singular</b>.</span></div>
+
+<div class="ex"><b>Ex (Problem 5.4 #14): \(x^2(1-x)y'' + (x-2)y' - 3xy = 0\)</b>
+<span class="s">Singular at \(x=0, 1\). At \(x=0\): \(x\cdot p = \dfrac{x-2}{x(1-x)} \to \pm\infty\) ⇒ <b>irregular</b>.</span>
+<span class="s">At \(x=1\): \((x-1)p = \dfrac{2-x}{x^2} \to 1\); \((x-1)^2 q = \dfrac{3(x-1)}{x} \to 0\). Both finite ⇒ <b>regular</b>.</span></div>
+
+<h3>Euler Equations: \(x^2y'' + \alpha xy' + \beta y = 0\)</h3>
+<div class="f"><b>Indicial equation:</b> \(r^2 + (\alpha-1)r + \beta = 0\), \(\Delta = (\alpha-1)^2 - 4\beta\)</div>
+<div class="f"><b>Case I (\(\Delta>0\)):</b> \(y = c_1 x^{r_1} + c_2 x^{r_2}\) (distinct real \(r_1, r_2\))</div>
+<div class="f"><b>Case II (\(\Delta=0\)):</b> \(y = c_1 x^r + c_2 x^r\ln x\) (repeated root \(r\))</div>
+<div class="f"><b>Case III (\(\Delta<0\)):</b> \(y = c_1 x^\lambda\cos(\mu\ln x) + c_2 x^\lambda\sin(\mu\ln x)\) (\(r=\lambda \pm \mu i\))</div>
+
+<div class="ex"><b>Ex (Case I): \(x^2y'' - xy' - 3y = 0\)</b>
+<span class="s">\(\alpha=-1, \beta=-3 \Rightarrow r^2 - 2r - 3 = (r-3)(r+1) = 0 \Rightarrow r=3, -1\)</span>
+<span class="s"><b>Ans:</b> \(y = c_1 x^3 + c_2 x^{-1}\) or \(c_1 x^3 + \dfrac{c_2}{x}\)</span></div>
+
+<div class="ex"><b>Ex (Case II): \(x^2y'' - 5xy' + 9y = 0\)</b>
+<span class="s">\(\alpha=-5, \beta=9 \Rightarrow r^2 - 6r + 9 = (r-3)^2 = 0 \Rightarrow r=3\) (repeated)</span>
+<span class="s"><b>Ans:</b> \(y = (c_1 + c_2\ln x)x^3\)</span></div>
+
+<div class="ex"><b>Ex (Case III, full steps): \(x^2y'' + 3xy' + 2y = 0\)</b>
+<span class="s"><b>Step 1:</b> \(\alpha = 3, \beta = 2\)</span>
+<span class="s"><b>Step 2:</b> Indicial: \(r^2 + (\alpha-1)r + \beta = r^2 + 2r + 2 = 0\)</span>
+<span class="s"><b>Step 3:</b> \(\Delta = (\alpha-1)^2 - 4\beta = 4 - 8 = -4 < 0\) ⇒ Case III</span>
+<span class="s"><b>Step 4:</b> \(r = \dfrac{-2 \pm \sqrt{-4}}{2} = \dfrac{-2 \pm 2i}{2} = -1 \pm i\). So \(\lambda=-1, \mu=1\).</span>
+<span class="s"><b>Step 5 (plug into Case III form):</b> \(y = x^{\lambda}[c_1\cos(\mu\ln x) + c_2\sin(\mu\ln x)]\)</span>
+<span class="s"><b>Ans:</b> \(y = x^{-1}[c_1\cos(\ln x) + c_2\sin(\ln x)] = \dfrac{c_1\cos(\ln x) + c_2\sin(\ln x)}{x}\), \(x > 0\)</span></div>
+
+<div class="warn"><b>⚠ Case III extraction pitfalls:</b>
+<ul style="margin:2px 0; padding-left:12px; font-size:10.5pt;">
+<li>\(\lambda\) = REAL part of the root. Including the sign. (If \(r = -1 \pm 2i\), then \(\lambda = -1\).)</li>
+<li>\(\mu\) = MAGNITUDE of imaginary part (always positive). (If \(r = 3 \pm 4i\), then \(\mu = 4\), NOT \(-4\).)</li>
+<li>The argument of cos/sin is \(\mu\ln x\), NOT \(\mu x\). Euler equations produce \(\ln x\) inside trig; characteristic-eq equations produce \(t\) inside trig.</li>
+<li>Solution valid for \(x > 0\). If asked about \(x < 0\), replace \(x\) with \(|x|\) and \(\ln x\) with \(\ln|x|\).</li>
+</ul>
+</div>
+
+<div class="warn"><b>Domain reminder:</b> All Euler solutions are valid for \(x > 0\) (standard). Singular point at \(x = 0\). For \(x < 0\), replace \(x\) with \(|x|\) in the solution.</div>
+
+<h3>Euler Cases — Quick Decision Table</h3>
+<table>
+<tr><th>\(\Delta\)</th><th>Roots</th><th>Case</th><th>Solution Form</th></tr>
+<tr><td>\(>0\)</td><td>Real distinct \(r_1, r_2\)</td><td>I</td><td>\(c_1 x^{r_1} + c_2 x^{r_2}\)</td></tr>
+<tr><td>\(=0\)</td><td>Repeated \(r\)</td><td>II</td><td>\((c_1+c_2\ln x)x^r\)</td></tr>
+<tr><td>\(<0\)</td><td>Complex \(\lambda \pm \mu i\)</td><td>III</td><td>\(x^\lambda(c_1\cos(\mu\ln x) + c_2\sin(\mu\ln x))\)</td></tr>
+</table>
+
+<h2 style="color:#cc6633;">COMMON CONFUSIONS</h2>
+
+<h3>#1. The \((n+1), (n+2)\) in series derivatives</h3>
+<div class="f"><b>These come from relabeling, NOT from the derivative itself.</b><br>
+Raw derivative: \(y' = \sum_{n=1} n\,a_n\,x^{n-1}\) (exponent drops — classic calc). <br>
+After relabeling (\(m=n-1\), rename back to \(n\)): \(y' = \sum_{n=0} (n+1)\,a_{n+1}\,x^n\). <br>
+Same series, different addressing. The \((n+1)\) is what \(m+1\) became after renaming.</div>
+
+<h3>#2. When sums start at different \(n\), align by peeling</h3>
+<div class="f">If one sum starts at \(n=1\) and another at \(n=0\), evaluate the \(n=0\) summand of the \(n=0\)-starting sum and place it out front as a standalone. Then both sums start at \(n=1\) and can merge. Result: \((n=0 \text{ term}) + \sum_{n\geq 1}[\cdots]x^n = 0\).</div>
+
+<h3>#3. Recurrence that jumps by 2 → even/odd decouple</h3>
+<div class="f">If your recurrence says \(a_{n+2} = f(n)\,a_n\), the even indices depend ONLY on \(a_0\) and odd indices ONLY on \(a_1\). That is why Steps 3 & 4 (plug in \((a_0,a_1)=(1,0)\) and \((0,1)\)) cleanly isolate \(y_1\) and \(y_2\).</div>
+
+<h3>#4. Why Wronskian \(=1\) automatically at 0</h3>
+<div class="f">Because \(y(0)=a_0\) and \(y'(0)=a_1\) directly (plug \(x=0\) into the series). So choosing \((a_0,a_1)=(1,0)\) for \(y_1\) FORCES \(y_1(0)=1, y_1'(0)=0\), and \((0,1)\) for \(y_2\) FORCES \(y_2(0)=0, y_2'(0)=1\). The Wronskian is then \(\det\begin{bmatrix}1&0\\0&1\end{bmatrix}=1\) by construction.</div>
+
+<h3>#5. Ratio Test — what to divide by what</h3>
+<div class="f">For a power series \(\sum c_k x^{2k}\) (or \(x^k\)), include the \(x\) in \(c_k\). Compute \(L(x) = \lim |c_{k+1}/c_k|\) as a function of \(x\). The radius \(R\) is the critical \(|x|\) at which \(L = 1\). If \(L = 0\) for all \(x\), then \(R = \infty\). If \(L = \infty\) for all \(x \neq 0\), then \(R = 0\). <br><b>Rule of thumb:</b> factorial downstairs ⇒ \(R = \infty\); factorial upstairs ⇒ \(R = 0\).</div>
+
+<h3>#6. Spring vs. Euler — don't mix \(t\) and \(\ln x\)</h3>
+<div class="f">Spring/mass problems: variable is \(t\), solutions involve \(\cos(\omega t), \sin(\omega t), e^{rt}\). <br> Euler equations: variable is \(x\), solutions involve \(x^r\), \(x^r\ln x\), \(x^{\lambda}\cos(\mu\ln x)\). <br> If you see \(\ln x\) inside a cosine, you are in Euler-Case-III territory; if you see \(t\), you are in char-eq territory.</div>
+
+<h3>#7. When to check for duplication in UC</h3>
+<div class="f">After guessing \(y_p\), compare each term with \(y_h\). If ANY part of \(y_p\) appears in \(y_h\), multiply \(y_p\) by \(t\) (or \(t^2\) if the char eq had that root twice). Forgetting this gives contradictions when matching coefficients (e.g. \(0 = 5\)).</div>
+
+<h3>#8. Singular point: regular vs. irregular — how to think fast</h3>
+<div class="f">Multiply \(p(x) = Q/P\) by \((x-x_0)\) and \(q(x) = R/P\) by \((x-x_0)^2\). If BOTH products have a finite limit at \(x_0\), regular. If either blows up, irregular. In practice: count how hard \(P\) vanishes at \(x_0\) vs. how hard \(Q, R\) vanish. If the \((x-x_0)\) and \((x-x_0)^2\) factors are enough to absorb \(P\)'s vanishing, regular.</div>
+
+<h3>#9. When a problem says "Verify \(a_0\) is arbitrary"</h3>
+<div class="f">This is just asking you to confirm that nothing in the substitution/reindexing forces \(a_0\) to a specific value. In first-order problems, \(a_0\) is ALWAYS the free constant (because first-order ODEs have one arbitrary constant). In second-order problems both \(a_0\) and \(a_1\) are free.</div>
+
+<h2>QUICK CHECKS — Before You Finish</h2>
+<div class="warn"><b>Red Flags:</b>
+<ul style="margin:2px 0; padding-left:12px; font-size:10.5pt;">
+<li><b>Series:</b> Did you use \(\dfrac{}{}\) not \(\frac{}{}\)? Braced exponents like \(\omega^{2}\) not \(\omega^2\)?</li>
+<li><b>Euler:</b> Extracted \(\lambda\) and \(\mu\) correctly from complex roots? Check: \(\lambda =\) real part, \(\mu = |imag|\)</li>
+<li><b>IC application:</b> \(a_0 = y(0)\), \(a_1 = y'(0)\)? Then find higher coefficients from recurrence?</li>
+<li><b>Particular solution:</b> Did you plug \(y_p\) back into the ODE and match all coefficients?</li>
+<li><b>Oscillations:</b> Domain: Euler only for \(x>0\) OR \(x<0\), not both. Spring: check discriminant for damping case.</li>
+<li><b>Convergence:</b> \(R = \dfrac{1}{\text{limit}}\), not just the limit. Check: \(|x-x_0| < R\)</li>
+</ul>
+</div>
+
+</div>
+
+</body>
+</html>

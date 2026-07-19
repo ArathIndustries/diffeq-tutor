@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Series Solutions & Euler Equations — Interactive Tutor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="shared/tutor-core.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="shared/tutor-core.js"></script>
+</head>
+<body style="padding: 2rem; max-width: 920px; margin: 0 auto;">
+
+<h1>Series Solutions & Euler Equations</h1>
+<p class="subtitle">Differential Equations — Interactive Tutor — 12-problem set</p>
+
+<!-- Progress Tracking -->
+<div class="progress-container" id="progress-container" style="display:none;">
+  <div class="progress-label">Your Progress</div>
+  <div class="progress-bar">
+    <div class="progress-fill" style="width: 0%"></div>
+  </div>
+  <div class="progress-text">
+    <span>0 / 12 complete</span>
+    <span>0%</span>
+  </div>
+  <button class="reset-progress-btn" id="reset-btn">Reset Progress</button>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <h3>Legend</h3>
+  <div class="item" style="color: var(--green);">✓ &mdash; Mark problems as complete to track your progress</div>
+</div>
+
+<!-- Table of Contents -->
+<div class="toc">
+  <h3>Table of Contents</h3>
+  <ul id="toc-list">
+    <!-- Populated by JS -->
+  </ul>
+</div>
+
+<!-- Problems Container -->
+<div id="problems-container"></div>
+
+<p class="note" style="text-align:center; margin-top: 2rem;">End of problem set &mdash; Series Solutions &amp; Euler Equations</p>
+
+<script>
+TutorCore.setProgressPrefix('diffeq-series-euler-');
+
+// Problem objects — all 12 problems from HW 5.3-5.4
+const PROBLEMS = [
+  // ===== SECTION 5.3 =====
+  {
+    id: 's53p1',
+    section: '5.3',
+    num: 1,
+    title: 'Series Solution: $y\'\' + xy\' + y = 0$',
+    prompt: '$y\'\' + xy\' + y = 0$ at $x_0 = 0$. <br> Find two fundamental series solutions $y_1, y_2$, the recurrence relation, the radius of convergence, and verify $\\{y_1, y_2\\}$ is a fundamental set.',
+    reference: '<span class="title">The 6-step series method</span> (1) Substitute the series ansatz and re-index. (2) Get the recurrence relation. (3) Plug in $a_0 = 1, a_1 = 0$ to build $y_1$. (4) Plug in $a_0 = 0, a_1 = 1$ to build $y_2$. (5) Find the radius of convergence using the Ratio Test. (6) Compute the Wronskian $W[y_1, y_2](0)$ to confirm a fundamental set.',
+    steps: [
+      {
+        label: 'Setup — Confirm $x_0 = 0$ is an ordinary point',
+        why: 'Theorem 5.3.1 guarantees two analytic series solutions exactly when $x_0$ is ordinary. Here $P(x)=1$, $Q(x)=x$, $R(x)=1$, and $P(0)=1 \\neq 0$, so $x_0=0$ is ordinary.',
+        body: 'Both $p(x) = Q/P = x$ and $q(x) = R/P = 1$ are polynomials, so their radius of analyticity is $\\infty$. Theorem 5.3.1 promises series solutions valid for all $x$.'
+      },
+      {
+        label: 'Step 1 — Series ansatz + re-index (full derivation)',
+        why: 'Step 1 of the method: write $y, y\', y\'\'$ as series with matching powers so we can combine them later. The derivatives are computed by normal calculus (exponent drops each time) — the confusing $n+1, n+2$ coefficients come from a <em>relabeling step</em> afterwards, NOT from the derivative.',
+        body: '<strong>1a. Ansatz (the assumed series).</strong><br> General form at $x_0$: $\\displaystyle y = \\sum_{n=0}^{\\infty} a_n(x-x_0)^n$. Since here $x_0 = 0$: $$y = \\sum_{n=0}^{\\infty} a_n\\,x^n = a_0 + a_1 x + a_2 x^2 + a_3 x^3 + a_4 x^4 + \\cdots$$ <hr class="solution-divider"> <strong>1b. Raw derivatives (exponent drops by 1, just like calc I).</strong><br> Differentiating term-by-term: $$y\' = \\dfrac{d}{dx}\\bigl[a_0 + a_1 x + a_2 x^2 + a_3 x^3 + \\cdots\\bigr] = 0 + a_1 + 2a_2 x + 3a_3 x^2 + 4a_4 x^3 + \\cdots$$ In summation form, the $n=0$ term vanishes (derivative of the constant $a_0$ is $0$), so we start at $n=1$: $$\\boxed{\\;y\' = \\sum_{n=1}^{\\infty} n\\,a_n\\,x^{n-1}\\;}$$ (Notice the exponent is $n-1$ — subtracted by 1, exactly as you expected.) <br><br> Differentiate once more: $$y\'\' = 0 + 2a_2 + 6a_3 x + 12a_4 x^2 + 20a_5 x^3 + \\cdots$$ $$\\boxed{\\;y\'\' = \\sum_{n=2}^{\\infty} n(n-1)\\,a_n\\,x^{n-2}\\;}$$ (Exponent is $n-2$ — subtracted by 2. Starts at $n=2$ because $n=0$ and $n=1$ terms vanish.) <hr class="solution-divider"> <strong>1c. The problem: mixed powers.</strong><br> Right now our three sums have different exponents: $$y \\sim x^n, \\quad y\' \\sim x^{n-1}, \\quad y\'\' \\sim x^{n-2}.$$ To combine them later we need every sum to show the SAME power of $x$. <strong>This does not change the math — we just relabel the dummy index.</strong> <hr class="solution-divider"> <strong>1d. Relabel $y\'$ to get $x^n$ instead of $x^{n-1}$.</strong><br> Let $m = n - 1$, so $n = m + 1$. Substitute everywhere $n$ appears: <table style="font-size:0.85em; margin:0.4rem 0;"><tr><th>Old</th><th>Replace with</th></tr><tr><td>starting index $n = 1$</td><td>$m = 0$</td></tr><tr><td>coefficient $n$</td><td>$m+1$</td></tr><tr><td>$a_n$</td><td>$a_{m+1}$</td></tr><tr><td>$x^{n-1}$</td><td>$x^m$</td></tr></table> So $$y\' = \\sum_{m=0}^{\\infty} (m+1)\\,a_{m+1}\\,x^m.$$ Now rename $m$ back to $n$ (just a label — the <em>value</em> of the sum is unchanged): $$\\boxed{\\;y\' = \\sum_{n=0}^{\\infty} (n+1)\\,a_{n+1}\\,x^n\\;}$$ <strong>This is where the $(n+1)$ comes from</strong> — it is $m+1$ after we renamed $m\\to n$. <strong>Not from the derivative.</strong> <hr class="solution-divider"> <strong>1e. Same move for $y\'\'$: let $m = n - 2$, so $n = m+2$.</strong><br> $$y\'\' = \\sum_{m=0}^{\\infty} (m+2)(m+1)\\,a_{m+2}\\,x^m = \\boxed{\\;\\sum_{n=0}^{\\infty}(n+2)(n+1)\\,a_{n+2}\\,x^n\\;}$$ <hr class="solution-divider"> <strong>1f. Sanity check (plug in $n=0$ on both sides).</strong><br> $y\'(0)$ should equal $a_1$: <br>&bull; From the RAW form ($\\sum n a_n x^{n-1}$, start $n=1$): at $n=1$, coefficient is $1\\cdot a_1 = a_1$ ✓ <br>&bull; From the RELABELED form ($\\sum (n+1)a_{n+1}x^n$, start $n=0$): at $n=0$, coefficient is $(0+1)a_{0+1} = a_1$ ✓ <br><strong>Same number, different address.</strong> <hr class="solution-divider"> <strong>1g. Handle the $xy\'$ term.</strong><br> Now for the ODE&rsquo;s middle term: $$xy\' = x \\cdot \\sum_{n=0}^{\\infty}(n+1)a_{n+1}x^n = \\sum_{n=0}^{\\infty}(n+1)a_{n+1}x^{n+1}.$$ Multiplying by $x$ bumped the exponent up by 1. Reindex again (let $m = n+1$, so $n = m-1$): <table style="font-size:0.85em; margin:0.4rem 0;"><tr><th>Old</th><th>Replace with</th></tr><tr><td>starting index $n=0$</td><td>$m = 1$</td></tr><tr><td>$(n+1)$</td><td>$m$</td></tr><tr><td>$a_{n+1}$</td><td>$a_m$</td></tr><tr><td>$x^{n+1}$</td><td>$x^m$</td></tr></table> $$xy\' = \\sum_{m=1}^{\\infty} m\\,a_m\\,x^m = \\boxed{\\;\\sum_{n=1}^{\\infty} n\\,a_n\\,x^n\\;}$$ <strong>Important:</strong> this sum starts at $n=1$, not $n=0$. <hr class="solution-divider"> <strong>1h. Summary — all three pieces now in $x^n$ form.</strong><br> $$y = \\sum_{n=0}^{\\infty} a_n\\,x^n, \\quad y\'\' = \\sum_{n=0}^{\\infty}(n+2)(n+1)a_{n+2}\\,x^n, \\quad xy\' = \\sum_{n=1}^{\\infty} n\\,a_n\\,x^n.$$ Ready for Step 2.'
+      },
+      {
+        label: 'Step 2 — Substitute + pull out $n=0$ + get the recurrence (full walkthrough)',
+        why: 'Step 2 of the method: combine the three sums, but first align their starting indices by peeling off the $n=0$ term from any sum that reaches $n=0$. Then set each $x^n$ coefficient to zero to read off the recurrence.',
+        body: '<strong>2a. Starting point — substitute Step 1&rsquo;s pieces into the ODE $y\'\' + xy\' + y = 0$:</strong> $$\\underbrace{\\sum_{n=0}^{\\infty}(n+2)(n+1)a_{n+2}\\,x^n}_{\\text{starts at }n=0} + \\underbrace{\\sum_{n=1}^{\\infty} n\\,a_n\\,x^n}_{\\text{starts at }n=1} + \\underbrace{\\sum_{n=0}^{\\infty} a_n\\,x^n}_{\\text{starts at }n=0} = 0.$$ <hr class="solution-divider"> <strong>2b. The problem — mixed starting indices.</strong><br> Two sums start at $n=0$, the middle sum starts at $n=1$. If we naively merge them into one sum $\\sum_{n=?}[\\ldots]x^n$, we either: <ul><li>pick starting index $n=0$ → falsely include a non-existent $n=0$ term from the middle sum, OR</li><li>pick starting index $n=1$ → drop the real $n=0$ terms from the two outer sums.</li></ul> Both are wrong. <br><br> <strong>Fix:</strong> peel the $n=0$ terms off the outer sums so all three sums start at $n=1$, then combine. <hr class="solution-divider"> <strong>2c. What does the $n=0$ term of each sum equal?</strong><br><br> <em>Sum 1 (from $y\'\'$):</em> plug $n=0$ into $(n+2)(n+1)a_{n+2}x^n$: $$(0+2)(0+1)\\,a_{0+2}\\,x^0 = 2 \\cdot 1 \\cdot a_2 \\cdot 1 = 2a_2.$$ <em>Sum 3 (from $y$):</em> plug $n=0$ into $a_n x^n$: $$a_0\\,x^0 = a_0.$$ <em>Sum 2 (from $xy\'$):</em> no $n=0$ term — the sum already starts at $n=1$. Nothing to pull. <hr class="solution-divider"> <strong>2d. Rewrite each sum with the $n=0$ term standing out front.</strong> $$\\text{Sum 1} = 2a_2 + \\sum_{n=1}^{\\infty}(n+2)(n+1)a_{n+2}\\,x^n$$ $$\\text{Sum 2} = \\phantom{0} \\; \\sum_{n=1}^{\\infty} n\\,a_n\\,x^n \\quad (\\text{unchanged})$$ $$\\text{Sum 3} = a_0 + \\sum_{n=1}^{\\infty} a_n\\,x^n$$ <hr class="solution-divider"> <strong>2e. Add them back together.</strong> Standalone $n=0$ pieces collect up front; the three sums (now all starting at $n=1$) merge into one combined sum: $$\\underbrace{\\bigl(2a_2 + a_0\\bigr)}_{n=0\\text{ piece}} + \\underbrace{\\sum_{n=1}^{\\infty}\\bigl[(n+2)(n+1)a_{n+2} + n\\,a_n + a_n\\bigr]\\,x^n}_{n\\geq 1\\text{ piece (one combined sum)}} = 0.$$ <hr class="solution-divider"> <strong>2f. Each coefficient must vanish.</strong><br> For this polynomial to equal zero for EVERY value of $x$, the coefficient of each power of $x$ must individually be zero. <br><br> <strong>Coefficient of $x^0$:</strong> $$2a_2 + a_0 = 0 \\;\\Longrightarrow\\; a_2 = -\\dfrac{a_0}{2}.$$ <strong>Coefficient of $x^n$ for $n \\geq 1$:</strong> $$(n+2)(n+1)a_{n+2} + n\\,a_n + a_n = 0.$$ Combine the last two terms: $n\\,a_n + a_n = (n+1)\\,a_n$. So: $$(n+2)(n+1)\\,a_{n+2} + (n+1)\\,a_n = 0.$$ Divide both sides by $(n+1)$ (nonzero since $n \\geq 0$): $$(n+2)\\,a_{n+2} + a_n = 0 \\;\\Longrightarrow\\; a_{n+2} = -\\dfrac{a_n}{n+2}.$$ <hr class="solution-divider"> <strong>2g. Lucky coincidence — the recurrence absorbs the $n=0$ case.</strong><br> Plug $n=0$ into the recurrence $a_{n+2} = -\\dfrac{a_n}{n+2}$: $$a_2 = -\\dfrac{a_0}{0+2} = -\\dfrac{a_0}{2}.$$ This matches the $n=0$ piece from 2f exactly. ✓ So we drop the special case and write one clean formula that covers all $n \\geq 0$: $$\\boxed{\\;a_{n+2} = -\\dfrac{a_n}{n+2},\\quad n = 0, 1, 2, \\ldots\\;}$$ The recurrence jumps by 2, so even indices link only to even and odd only to odd — Steps 3 and 4 solve those two sub-sequences separately. <hr class="solution-divider"> <strong>Mental model (rule of thumb):</strong> when sums have mixed starting indices, align them to the HIGHEST starting index by peeling $n=0, n=1, \\ldots$ off the others as standalone terms out front. Then combine the now-aligned sums into one, and set each coefficient to zero.'
+      },
+      {
+        label: 'Step 3 — Build $y_1(x)$ with $a_0 = 1,\\; a_1 = 0$ (full walkthrough)',
+        why: 'Step 3 of the method: by picking the specific initial values $a_0 = 1, a_1 = 0$, we kill the entire odd-indexed branch and produce the first of the two fundamental solutions.',
+        body: '<strong>3a. Why $a_0 = 1, a_1 = 0$?</strong><br> The recurrence $a_{n+2} = -a_n/(n+2)$ leaves $a_0$ and $a_1$ free — they are the two &ldquo;seeds&rdquo; that determine everything else. To get ONE linearly independent solution (call it $y_1$), we set one seed to $1$ and the other to $0$. Convention: $a_0=1, a_1=0$ gives $y_1$; flipping them ($a_0=0, a_1=1$) will give $y_2$ in Step 4. <hr class="solution-divider"> <strong>3b. All odd coefficients vanish — chain reaction from $a_1 = 0$.</strong><br> The recurrence links $a_n$ to $a_{n+2}$ (indices differ by 2), so once you pick an odd-indexed coefficient its entire sub-sequence is locked in. Start from $a_1 = 0$: $$a_3 = -\\dfrac{a_1}{3} = -\\dfrac{0}{3} = 0.$$ $$a_5 = -\\dfrac{a_3}{5} = -\\dfrac{0}{5} = 0.$$ $$a_7 = -\\dfrac{a_5}{7} = 0.$$ $$\\ldots \\text{every odd } a_{2k+1} = 0.$$ <strong>So in $y_1$, there are no odd-power terms at all.</strong> <hr class="solution-divider"> <strong>3c. Compute the even coefficients one by one.</strong><br> Start from $a_0 = 1$ and plug $n = 0, 2, 4, \\ldots$ into the recurrence: <br><br> <em>$n=0$:</em> $a_2 = -\\dfrac{a_0}{0+2} = -\\dfrac{1}{2}$. <br> <em>$n=2$:</em> $a_4 = -\\dfrac{a_2}{2+2} = -\\dfrac{-1/2}{4} = \\dfrac{1}{2 \\cdot 4} = \\dfrac{1}{8}$. <br> <em>$n=4$:</em> $a_6 = -\\dfrac{a_4}{4+2} = -\\dfrac{1/8}{6} = -\\dfrac{1}{2 \\cdot 4 \\cdot 6} = -\\dfrac{1}{48}$. <br> <em>$n=6$:</em> $a_8 = -\\dfrac{a_6}{6+2} = -\\dfrac{-1/48}{8} = \\dfrac{1}{2 \\cdot 4 \\cdot 6 \\cdot 8} = \\dfrac{1}{384}$. <br> <em>$n=8$:</em> $a_{10} = -\\dfrac{a_8}{10} = -\\dfrac{1}{2 \\cdot 4 \\cdot 6 \\cdot 8 \\cdot 10}$. <hr class="solution-divider"> <strong>3d. Spot the pattern.</strong><br> Write each $a_{2k}$ as $\\dfrac{(\\pm 1)}{2 \\cdot 4 \\cdot 6 \\cdots (2k)}$ — the denominator is a product of consecutive even numbers up to $2k$, and the sign alternates. Factor the denominator: $$2 \\cdot 4 \\cdot 6 \\cdots (2k) = (2 \\cdot 1)(2 \\cdot 2)(2 \\cdot 3)\\cdots(2 \\cdot k) = 2^k \\cdot k!$$ (factor one 2 out of each term — $k$ of them — and what is left is $1 \\cdot 2 \\cdot 3 \\cdots k = k!$). So: $$\\boxed{\\;a_{2k} = \\dfrac{(-1)^k}{2^k\\,k!}\\,\\;,\\quad k = 0, 1, 2, \\ldots\\;}$$ <strong>Verify</strong> by plugging in small $k$: <br> $k=0$: $(-1)^0/(2^0 \\cdot 0!) = 1/1 = 1 = a_0$ ✓ <br> $k=1$: $(-1)^1/(2^1 \\cdot 1!) = -1/2 = a_2$ ✓ <br> $k=2$: $(-1)^2/(2^2 \\cdot 2!) = 1/8 = a_4$ ✓ <br> $k=3$: $(-1)^3/(2^3 \\cdot 3!) = -1/48 = a_6$ ✓ <hr class="solution-divider"> <strong>3e. Assemble the series.</strong><br> Plug the even coefficients back into $y = \\sum a_n x^n$, skipping the zero odd terms. Since only $a_{2k}$ survives, use index $k$ and $x^{2k}$: $$y_1(x) = \\sum_{k=0}^{\\infty} a_{2k}\\,x^{2k} = \\sum_{k=0}^{\\infty}\\dfrac{(-1)^k}{2^k\\,k!}\\,x^{2k}.$$ Unrolling the first few terms: $$\\boxed{\\;y_1(x) = 1 - \\dfrac{x^2}{2} + \\dfrac{x^4}{2\\cdot 4} - \\dfrac{x^6}{2\\cdot 4\\cdot 6} + \\dfrac{x^8}{2\\cdot 4\\cdot 6\\cdot 8} - \\cdots\\;}$$ <hr class="solution-divider"> <strong>3f. Recognize the closed form (optional but satisfying).</strong><br> Rewrite $\\dfrac{(-1)^k x^{2k}}{2^k k!} = \\dfrac{1}{k!}\\left(-\\dfrac{x^2}{2}\\right)^k$. Then: $$y_1(x) = \\sum_{k=0}^{\\infty}\\dfrac{1}{k!}\\left(-\\dfrac{x^2}{2}\\right)^k = e^{-x^2/2}$$ using the exponential series $e^u = \\sum u^k / k!$ with $u = -x^2/2$. So $y_1(x) = e^{-x^2/2}$. (Not required — the series form is the full answer. The closed form is a nice check.)'
+      },
+      {
+        label: 'Step 4 — Build $y_2(x)$ with $a_0 = 0,\\; a_1 = 1$ (full walkthrough)',
+        why: 'Step 4 of the method: swap which seed is $1$ and which is $0$. Now the even branch vanishes and the odd branch carries the solution.',
+        body: '<strong>4a. Swap the seeds.</strong><br> Now use $a_0 = 0,\\; a_1 = 1$. By the same chain-reaction argument as 3b, since $a_0 = 0$ every EVEN coefficient becomes zero: $$a_2 = -\\dfrac{a_0}{2} = 0, \\quad a_4 = -\\dfrac{a_2}{4} = 0, \\quad a_6 = 0, \\quad \\ldots$$ <strong>So $y_2$ has no even-power terms — it has only odd powers.</strong> <hr class="solution-divider"> <strong>4b. Compute odd coefficients from the recurrence.</strong><br> Start with $a_1 = 1$ and plug $n = 1, 3, 5, \\ldots$ into $a_{n+2} = -a_n/(n+2)$: <br><br> <em>$n=1$:</em> $a_3 = -\\dfrac{a_1}{1+2} = -\\dfrac{1}{3}$. <br> <em>$n=3$:</em> $a_5 = -\\dfrac{a_3}{3+2} = -\\dfrac{-1/3}{5} = \\dfrac{1}{3 \\cdot 5}$. <br> <em>$n=5$:</em> $a_7 = -\\dfrac{a_5}{5+2} = -\\dfrac{1/(3\\cdot 5)}{7} = -\\dfrac{1}{3 \\cdot 5 \\cdot 7}$. <br> <em>$n=7$:</em> $a_9 = -\\dfrac{a_7}{9} = \\dfrac{1}{3 \\cdot 5 \\cdot 7 \\cdot 9}$. <hr class="solution-divider"> <strong>4c. Pattern.</strong><br> $a_{2k+1}$ has denominator $3 \\cdot 5 \\cdot 7 \\cdots (2k+1)$ (the product of odd numbers from 3 up to $2k+1$) and sign $(-1)^k$: $$\\boxed{\\;a_{2k+1} = \\dfrac{(-1)^k}{3 \\cdot 5 \\cdot 7 \\cdots (2k+1)}\\;,\\quad k = 0, 1, 2, \\ldots\\;}$$ (with the convention that $k=0$ gives $a_1 = 1$, i.e. an empty product equals 1). <hr class="solution-divider"> <strong>4d. Assemble the series.</strong><br> $$y_2(x) = \\sum_{k=0}^{\\infty} a_{2k+1}\\,x^{2k+1} = \\sum_{k=0}^{\\infty}\\dfrac{(-1)^k}{3\\cdot 5 \\cdots (2k+1)}\\,x^{2k+1}.$$ Unrolling: $$\\boxed{\\;y_2(x) = x - \\dfrac{x^3}{3} + \\dfrac{x^5}{3\\cdot 5} - \\dfrac{x^7}{3\\cdot 5\\cdot 7} + \\dfrac{x^9}{3\\cdot 5\\cdot 7 \\cdot 9} - \\cdots\\;}$$ <hr class="solution-divider"> <strong>4e. No standard elementary closed form.</strong><br> Unlike $y_1 = e^{-x^2/2}$, $y_2$ is not a standard elementary function. That is fine — the series IS the answer. (It is related to the Dawson function or the error function, but you are not expected to know that.)'
+      },
+      {
+        label: 'Step 5 — Radius of convergence via Ratio Test (full walkthrough)',
+        why: 'Step 5 of the method: the Ratio Test tells you for which $x$ the series actually converges to a number. The biggest such radius is $R$; the solution is valid on $|x - x_0| < R$.',
+        body: '<strong>5a. What the Ratio Test says (reminder from Calc II).</strong><br> For a series $\\sum c_k$, compute $L = \\lim_{k \\to \\infty}\\left|\\dfrac{c_{k+1}}{c_k}\\right|$. Then: <ul><li>If $L < 1$: series converges.</li><li>If $L > 1$: series diverges.</li><li>If $L = 1$: test is inconclusive.</li></ul> For a power series $\\sum c_k x^{?}$, $L$ will typically depend on $x$. We find the region where $L < 1$ — that defines the radius of convergence. <hr class="solution-divider"> <strong>5b. Set up $c_k$ for our $y_1$.</strong><br> From Step 3, $y_1(x) = \\sum_{k=0}^{\\infty} c_k$ where $$c_k = \\dfrac{(-1)^k}{2^k\\,k!}\\,x^{2k}.$$ (We fold the $x^{2k}$ into $c_k$ since we are testing convergence as a function of $x$.) <hr class="solution-divider"> <strong>5c. Form the ratio $c_{k+1}/c_k$.</strong><br> Write $c_{k+1}$ carefully — replace every $k$ with $k+1$: $$c_{k+1} = \\dfrac{(-1)^{k+1}}{2^{k+1}\\,(k+1)!}\\,x^{2(k+1)}.$$ Now divide: $$\\dfrac{c_{k+1}}{c_k} = \\dfrac{(-1)^{k+1}\\,x^{2(k+1)}}{2^{k+1}\\,(k+1)!} \\div \\dfrac{(-1)^k\\,x^{2k}}{2^k\\,k!} = \\dfrac{(-1)^{k+1}\\,x^{2(k+1)}}{2^{k+1}(k+1)!} \\cdot \\dfrac{2^k\\,k!}{(-1)^k\\,x^{2k}}.$$ <hr class="solution-divider"> <strong>5d. Simplify piece by piece.</strong><br> <em>Sign:</em> $(-1)^{k+1}/(-1)^k = -1$. Since we take the absolute value it disappears. <br> <em>Power of $2$:</em> $2^k / 2^{k+1} = 1/2$. <br> <em>Factorial:</em> $k! / (k+1)! = 1/(k+1)$. <br> <em>Power of $x$:</em> $x^{2(k+1)} / x^{2k} = x^{2k+2-2k} = x^2$. <br><br> Multiplying these: $$\\left|\\dfrac{c_{k+1}}{c_k}\\right| = 1 \\cdot \\dfrac{1}{2} \\cdot \\dfrac{1}{k+1} \\cdot x^2 = \\dfrac{x^2}{2(k+1)}.$$ <hr class="solution-divider"> <strong>5e. Take the limit as $k \\to \\infty$.</strong><br> $$L = \\lim_{k \\to \\infty}\\dfrac{x^2}{2(k+1)} = 0 \\quad \\text{for every finite } x.$$ ($x^2$ stays fixed; denominator blows up; quotient $\\to 0$.) <hr class="solution-divider"> <strong>5f. Interpret.</strong><br> $L = 0 < 1$ for every real $x$, so the Ratio Test says the series converges everywhere. Therefore: $$\\boxed{\\;R = \\infty\\;}$$ This matches Theorem 5.3.1&rsquo;s guarantee: since $p(x) = x$ and $q(x) = 1$ are polynomials (analytic everywhere), the series solution around any ordinary point has infinite radius. <hr class="solution-divider"> <strong>Mental model:</strong> a factorial in the denominator almost always forces $R = \\infty$ because $k!$ grows faster than any exponential or polynomial. Whenever you see $k!$ downstairs, expect $R = \\infty$.'
+      },
+      {
+        label: 'Step 6 — Wronskian $W[y_1, y_2](0)$ (full walkthrough)',
+        why: 'Step 6 of the method: two solutions form a fundamental set if and only if their Wronskian is nonzero at some point. By Abel&rsquo;s theorem it is either always zero or never zero on the domain — so we only need to check one convenient point. The cheap choice is $x=0$.',
+        body: '<strong>6a. Wronskian definition.</strong><br> For two functions $y_1, y_2$, the Wronskian is $$W[y_1, y_2](x) = \\det\\begin{bmatrix} y_1(x) & y_2(x) \\\\ y_1\'(x) & y_2\'(x) \\end{bmatrix} = y_1(x)\\,y_2\'(x) - y_2(x)\\,y_1\'(x).$$ Theorem: $y_1, y_2$ are linearly independent (a fundamental set) $\\iff W \\neq 0$ at some point in the interval. <hr class="solution-divider"> <strong>6b. Compute $y_1(0)$ and $y_1\'(0)$.</strong><br> From Step 3: $y_1(x) = 1 - \\dfrac{x^2}{2} + \\dfrac{x^4}{2\\cdot 4} - \\cdots$ <br><br> <em>$y_1(0)$:</em> plug $x = 0$ into the series. Only the constant term survives: $$y_1(0) = 1 - 0 + 0 - \\cdots = 1.$$ <em>$y_1\'(x)$:</em> differentiate term-by-term. $$y_1\'(x) = 0 - x + \\dfrac{4x^3}{2\\cdot 4} - \\dfrac{6x^5}{2\\cdot 4\\cdot 6} + \\cdots = -x + \\dfrac{x^3}{2} - \\cdots$$ Every term has a factor of $x$. So: $$y_1\'(0) = 0.$$ <strong>Shortcut observation:</strong> Since $y_1$ starts with $1$ (constant term) and has NO linear ($x^1$) term, automatically $y_1(0) = 1$ and $y_1\'(0) = 0$. <hr class="solution-divider"> <strong>6c. Compute $y_2(0)$ and $y_2\'(0)$.</strong><br> From Step 4: $y_2(x) = x - \\dfrac{x^3}{3} + \\dfrac{x^5}{3\\cdot 5} - \\cdots$ <br><br> <em>$y_2(0)$:</em> every term has a factor of $x$. $$y_2(0) = 0 - 0 + 0 - \\cdots = 0.$$ <em>$y_2\'(x)$:</em> differentiate term-by-term. $$y_2\'(x) = 1 - \\dfrac{3x^2}{3} + \\dfrac{5x^4}{3\\cdot 5} - \\cdots = 1 - x^2 + \\dfrac{x^4}{3} - \\cdots$$ At $x = 0$: only the constant term survives: $$y_2\'(0) = 1.$$ <strong>Shortcut observation:</strong> Since $y_2$ starts with $x$ (no constant term, linear coefficient $1$), automatically $y_2(0) = 0$ and $y_2\'(0) = 1$. <hr class="solution-divider"> <strong>6d. This is by design — the seeds ARE the initial values.</strong><br> The values $y_1(0) = 1, y_1\'(0) = 0, y_2(0) = 0, y_2\'(0) = 1$ are not coincidences — they are exactly the seeds we chose in Steps 3 and 4. Why? Because for $y = \\sum a_n x^n$: $$y(0) = a_0, \\qquad y\'(0) = a_1.$$ (Plug $x = 0$ into the series and the derivative series.) So picking $(a_0, a_1) = (1, 0)$ forces $(y_1(0), y_1\'(0)) = (1, 0)$, and picking $(0, 1)$ forces $(y_2(0), y_2\'(0)) = (0, 1)$. <hr class="solution-divider"> <strong>6e. Assemble the Wronskian at $x = 0$.</strong><br> $$W[y_1, y_2](0) = \\det\\begin{bmatrix} y_1(0) & y_2(0) \\\\ y_1\'(0) & y_2\'(0) \\end{bmatrix} = \\det\\begin{bmatrix} 1 & 0 \\\\ 0 & 1 \\end{bmatrix}.$$ Determinant of a $2\\times 2$ matrix $\\begin{bmatrix} a & b \\\\ c & d\\end{bmatrix}$ is $ad - bc$: $$W[y_1, y_2](0) = (1)(1) - (0)(0) = 1.$$ <hr class="solution-divider"> <strong>6f. Interpret.</strong><br> $W[y_1, y_2](0) = 1 \\neq 0$, so $y_1$ and $y_2$ are linearly independent — they form a fundamental set. Every solution of the ODE can be written as a linear combination: $$\\boxed{\\;y(x) = a_0\\,y_1(x) + a_1\\,y_2(x)\\;}$$ where $a_0, a_1$ are determined by initial conditions (if given). <hr class="solution-divider"> <strong>The big-picture payoff.</strong> Because we built $y_1, y_2$ with the specific seeds $(1,0)$ and $(0,1)$, the Wronskian at $0$ automatically becomes the identity-matrix determinant $= 1$. This is not a coincidence — it is a consequence of the construction.'
+      }
+    ],
+    answer: '<strong>Recurrence:</strong> $a_{n+2} = -\\dfrac{a_n}{n+2}$ for $n \\geq 0$. <br><br> <strong>Two fundamental solutions:</strong> $$y_1(x) = 1 - \\dfrac{x^2}{2} + \\dfrac{x^4}{2\\cdot 4} - \\dfrac{x^6}{2\\cdot 4\\cdot 6} + \\cdots = e^{-x^2/2}$$ $$y_2(x) = x - \\dfrac{x^3}{3} + \\dfrac{x^5}{3\\cdot 5} - \\dfrac{x^7}{3\\cdot 5\\cdot 7} + \\cdots$$ <strong>Radius of convergence:</strong> $R = \\infty$. <br><br> <strong>Wronskian at 0:</strong> $W[y_1, y_2](0) = 1 \\neq 0$, so $\\{y_1, y_2\\}$ is a fundamental set. <br><br> <strong>General solution:</strong> $y(x) = a_0\\,y_1(x) + a_1\\,y_2(x)$.'
+  },
+
+  {
+    id: 's53p2',
+    section: '5.3',
+    num: 2,
+    title: 'Successive Diff. at $x_0 = 1$ (with $\\ln x$ term)',
+    prompt: '$x^2 y\'\' + (1+x)y\' + 3(\\ln x)\\,y = 0;\\quad y(1) = 2,\\; y\'(1) = 0$ <br> Determine $\\varphi\'\'(x_0),\\; \\varphi\'\'\'(x_0),\\; \\varphi^{(4)}(x_0)$ for $x_0 = 1$.',
+    reference: null,
+    steps: [
+      {
+        label: 'Step 1 — Solve for $y\'\'$ from the ODE',
+        why: 'Isolate $y\'\'$ so we can plug in $x = 1$ with the given initial conditions. Note $\\ln(1) = 0$.',
+        body: '$$y\'\' = \\frac{-(1+x)\\,y\' - 3(\\ln x)\\,y}{x^2}$$ At $x = 1$: $$y\'\'(1) = \\frac{-(1+1)(0) - 3(\\ln 1)(2)}{1^2} = \\frac{0 - 0}{1} = 0$$'
+      },
+      {
+        label: 'Step 2 — Differentiate the ODE to find $y\'\'\'$',
+        why: 'We differentiate the original ODE $x^2 y\'\' + (1+x)y\' + 3(\\ln x)y = 0$ term by term using the product rule on each product.',
+        body: '$$\\frac{d}{dx}\\bigl[x^2 y\'\' + (1+x)y\' + 3(\\ln x)y\\bigr] = 0$$ $$x^2 y\'\'\' + 2x\\,y\'\' + (1+x)y\'\' + y\' + 3(\\ln x)y\' + \\frac{3}{x}\\,y = 0$$ Combine the $y\'\'$ terms: $$x^2 y\'\'\' + (3x+1)y\'\' + (1 + 3\\ln x)y\' + \\frac{3}{x}\\,y = 0$$ At $x = 1$ (using $y(1)=2, y\'(1)=0, y\'\'(1)=0, \\ln 1 = 0$): $$y\'\'\'(1) + (4)(0) + (1)(0) + 3(2) = 0$$ $$\\boxed{y\'\'\'(1) = -6}$$'
+      },
+      {
+        label: 'Step 3 — Differentiate again to find $y^{(4)}$',
+        why: 'Differentiate the combined equation from Step 2. Apply the product rule to each term.',
+        body: '$$\\frac{d}{dx}\\bigl[x^2 y\'\'\' + (3x+1)y\'\' + (1+3\\ln x)y\' + \\tfrac{3}{x}\\,y\\bigr] = 0$$ $$x^2 y^{(4)} + 2x\\,y\'\'\' + (3x+1)y\'\'\' + 3y\'\' + (1+3\\ln x)y\'\' + \\frac{3}{x}\\,y\' + \\frac{3}{x}\\,y\' - \\frac{3}{x^2}\\,y = 0$$ Combine like terms: $$x^2 y^{(4)} + (5x+1)y\'\'\' + (4 + 3\\ln x)y\'\' + \\frac{6}{x}\\,y\' - \\frac{3}{x^2}\\,y = 0$$ At $x = 1$: $$y^{(4)}(1) + 6(-6) + 4(0) + 6(0) - 3(2) = 0$$ $$y^{(4)}(1) - 36 - 6 = 0$$ $$\\boxed{y^{(4)}(1) = 42}$$'
+      }
+    ],
+    answer: '$$\\varphi\'\'(1) = 0, \\quad \\varphi\'\'\'(1) = -6, \\quad \\varphi^{(4)}(1) = 42$$'
+  },
+
+  {
+    id: 's53p10',
+    section: '5.3',
+    num: 10,
+    title: 'Two Linearly Independent Series Solutions',
+    prompt: '$e^x y\'\' + xy = 0$ <br> Find the first four nonzero terms in each of two power series solutions about the origin. Show they form a fundamental set.',
+    reference: '<span class="title">Setup</span> Write as $y\'\' + (xe^{-x})y = 0$. Since $p(x) = 0$ and $q(x) = xe^{-x}$ are analytic at $x=0$, the origin is an ordinary point. We use successive differentiation with $y(0) = a_0,\\; y\'(0) = a_1$.',
+    steps: [
+      {
+        label: 'Step 1 — Find $y\'\'(0)$',
+        why: 'From the ODE $e^x y\'\' + xy = 0$, at $x=0$: $e^0 \\cdot y\'\'(0) + 0 \\cdot y(0) = 0$.',
+        body: '$$y\'\'(0) = 0 \\quad\\Longrightarrow\\quad a_2 = 0$$'
+      },
+      {
+        label: 'Step 2 — Differentiate ODE once to find $y\'\'\'(0)$',
+        why: 'Use product rule on both $e^x y\'\'$ and $xy$.',
+        body: '$$e^x y\'\'\' + e^x y\'\' + xy\' + y = 0$$ At $x=0$: $\\;y\'\'\'(0) + 0 + 0 + a_0 = 0$ $$y\'\'\'(0) = -a_0 \\quad\\Longrightarrow\\quad a_3 = \\frac{y\'\'\'(0)}{3!} = \\frac{-a_0}{6}$$'
+      },
+      {
+        label: 'Step 3 — Differentiate again to find $y^{(4)}(0)$',
+        why: 'Differentiate $e^x y\'\'\' + e^x y\'\' + xy\' + y = 0$ term by term.',
+        body: '$$e^x y^{(4)} + e^x y\'\'\' + e^x y\'\'\' + e^x y\'\' + xy\'\' + y\' + y\' = 0$$ $$e^x y^{(4)} + 2e^x y\'\'\' + e^x y\'\' + xy\'\' + 2y\' = 0$$ At $x=0$: $\\;y^{(4)}(0) + 2(-a_0) + 0 + 0 + 2a_1 = 0$ $$y^{(4)}(0) = 2a_0 - 2a_1 \\quad\\Longrightarrow\\quad a_4 = \\frac{2a_0 - 2a_1}{4!} = \\frac{a_0 - a_1}{12}$$'
+      },
+      {
+        label: 'Step 4 — Build $y_1$ (set $a_0 = 1, a_1 = 0$)',
+        why: 'Setting $a_0=1, a_1=0$ isolates the first linearly independent solution.',
+        body: '$$a_2 = 0,\\quad a_3 = -\\frac{1}{6},\\quad a_4 = \\frac{1}{12}$$ $$\\boxed{y_1 = 1 - \\frac{x^3}{6} + \\frac{x^4}{12} + \\cdots}$$'
+      },
+      {
+        label: 'Step 5 — Build $y_2$ (set $a_0 = 0, a_1 = 1$)',
+        why: 'Setting $a_0=0, a_1=1$ isolates the second linearly independent solution.',
+        body: '$$a_2 = 0,\\quad a_3 = 0,\\quad a_4 = -\\frac{1}{12}$$ $$\\boxed{y_2 = x - \\frac{x^4}{12} + \\cdots}$$'
+      },
+      {
+        label: 'Step 6 — Show fundamental set via the Wronskian',
+        why: 'Two solutions form a fundamental set if and only if their Wronskian is nonzero at some point.',
+        body: '$$W[y_1, y_2](0) = \\begin{vmatrix} y_1(0) & y_2(0) \\\\ y_1\'(0) & y_2\'(0) \\end{vmatrix} = \\begin{vmatrix} 1 & 0 \\\\ 0 & 1 \\end{vmatrix} = 1 \\neq 0$$'
+      }
+    ],
+    answer: '$y_1$ and $y_2$ form a fundamental set of solutions.'
+  },
+
+  {
+    id: 's53p13',
+    section: '5.3',
+    num: 13,
+    title: 'Power Series: $y\' - y = 0$',
+    prompt: '$y\' - y = 0$ <br> Solve by series in powers of $x$. Verify $a_0$ is arbitrary.',
+    reference: null,
+    steps: [
+      {
+        label: 'Step 1 — Assume a power series solution',
+        why: 'Standard method — assume $y = \\sum_{n=0}^{\\infty} a_n x^n$ and match coefficients.',
+        body: '$$y = \\sum_{n=0}^{\\infty} a_n x^n, \\qquad y\' = \\sum_{n=0}^{\\infty} (n+1)\\,a_{n+1}\\,x^n$$'
+      },
+      {
+        label: 'Step 2 — Substitute into the ODE',
+        why: null,
+        body: '$$y\' - y = \\sum_{n=0}^{\\infty} \\bigl[(n+1)\\,a_{n+1} - a_n\\bigr]\\,x^n = 0$$'
+      },
+      {
+        label: 'Step 3 — Extract the recurrence',
+        why: 'For this power series to be identically zero, every coefficient must vanish.',
+        body: '$$(n+1)\\,a_{n+1} = a_n \\quad\\Longrightarrow\\quad a_{n+1} = \\frac{a_n}{n+1}, \\qquad n \\geq 0$$'
+      },
+      {
+        label: 'Step 4 — Compute the coefficients',
+        why: null,
+        body: '$$a_1 = \\frac{a_0}{1}, \\quad a_2 = \\frac{a_1}{2} = \\frac{a_0}{2!}, \\quad a_3 = \\frac{a_2}{3} = \\frac{a_0}{3!}, \\quad \\ldots \\quad a_n = \\frac{a_0}{n!}$$'
+      },
+      {
+        label: 'Step 5 — Recognize the series',
+        why: null,
+        body: '$$y = a_0 \\sum_{n=0}^{\\infty} \\frac{x^n}{n!} = a_0\\,e^x$$'
+      }
+    ],
+    answer: '$$y = a_0\\,e^x, \\text{ where } a_0 \\text{ is arbitrary.}$$'
+  },
+
+  {
+    id: 's53p14',
+    section: '5.3',
+    num: 14,
+    title: 'Series Solution: $y\' - xy = 0$',
+    prompt: '$y\' - xy = 0$ <br> Solve by power series about $x_0 = 0$. Identify the recurrence, find the closed form, verify $a_0$ is arbitrary, and compute the radius of convergence.',
+    reference: '<span class="title">First-order note</span> This ODE is first-order, so only ONE constant ($a_0$) is free. Steps 3–4 of the method (separate $y_1, y_2$) and Step 6 (Wronskian) do not apply here — Steps 1, 2, 5 do.',
+    steps: [
+      {
+        label: 'Step 1 — Series ansatz + re-index $xy$',
+        why: 'Ordinary-point setup. Write $y\'$ with $x^n$ power, and reindex $xy$ so it is also in $x^n$ form. <em>For the full derivation of why $y\' = \\sum(n+1)a_{n+1}x^n$ (including the raw derivative and the index shift), see Problem 5.3 #1 Step 1.</em>',
+        body: 'General ansatz at $x_0$: $\\displaystyle y = \\sum_{n=0}^{\\infty} a_n(x-x_0)^n$. Since $x_0 = 0$: $\\displaystyle y = \\sum_{n=0}^{\\infty} a_n x^n$. <br><br> <strong>Raw derivative:</strong> $y\' = \\sum_{n=1}^{\\infty} n\\,a_n\\,x^{n-1}$ (exponent drops by 1). <br><br> <strong>Relabel to $x^n$</strong> (let $m = n-1$, then rename $m\\to n$): $$y\' = \\sum_{n=0}^{\\infty}(n+1)\\,a_{n+1}\\,x^n.$$ <strong>Reindex $xy$:</strong> multiplying by $x$ bumps the exponent up by 1. Let $m = n+1$: $$xy = \\sum_{n=0}^{\\infty} a_n\\,x^{n+1} = \\sum_{m=1}^{\\infty} a_{m-1}\\,x^m = \\sum_{n=1}^{\\infty} a_{n-1}\\,x^n.$$ The $xy$ sum starts at $n = 1$, not $n = 0$.'
+      },
+      {
+        label: 'Step 2 — Substitute + pull out $n=0$ + get the recurrence',
+        why: 'Substitute the re-indexed pieces into $y\' - xy = 0$. The two sums start at different indices, so we peel off the $n=0$ term to align them. (Same technique as 5.3 #1 Step 2.)',
+        body: '<strong>2a. The setup.</strong><br> From Step 1: $y\' = \\sum_{n=0}^{\\infty}(n+1)a_{n+1}x^n$ and $xy = \\sum_{n=1}^{\\infty}a_{n-1}x^n$. Substitute into $y\' - xy = 0$: $$\\underbrace{\\sum_{n=0}^{\\infty}(n+1)a_{n+1}\\,x^n}_{\\text{starts at } n=0} - \\underbrace{\\sum_{n=1}^{\\infty} a_{n-1}\\,x^n}_{\\text{starts at } n=1} = 0.$$ <hr class="solution-divider"> <strong>2b. Peel the $n=0$ term off the first sum.</strong><br> At $n = 0$: $(0+1)a_{0+1}\\,x^0 = a_1$. So: $$\\text{first sum} = a_1 + \\sum_{n=1}^{\\infty}(n+1)a_{n+1}\\,x^n.$$ Second sum has no $n=0$ term already. <hr class="solution-divider"> <strong>2c. Combine.</strong><br> $$\\underbrace{a_1}_{n=0 \\text{ piece}} + \\underbrace{\\sum_{n=1}^{\\infty}\\bigl[(n+1)a_{n+1} - a_{n-1}\\bigr]x^n}_{n\\geq 1 \\text{ piece}} = 0.$$ <hr class="solution-divider"> <strong>2d. Each coefficient must vanish.</strong><br> <em>$x^0$ coefficient:</em> $$a_1 = 0.$$ <em>$x^n$ coefficient, $n \\geq 1$:</em> $$(n+1)\\,a_{n+1} - a_{n-1} = 0 \\;\\Longrightarrow\\; \\boxed{\\;a_{n+1} = \\dfrac{a_{n-1}}{n+1}\\;,\\quad n \\geq 1.\\;}$$ Note the recurrence links $a_{n+1}$ to $a_{n-1}$ — indices differ by 2 again.'
+      },
+      {
+        label: 'Step 3 — Compute coefficients ($a_0$ free, $a_1 = 0$, full walkthrough)',
+        why: 'Only ONE free constant ($a_0$) since the ODE is first order. The chain reaction from $a_1 = 0$ kills all odd-indexed coefficients.',
+        body: '<strong>3a. Odd coefficients all vanish.</strong><br> From Step 2, $a_1 = 0$. The recurrence jumps by 2, so: $$a_3 = \\dfrac{a_1}{3} = 0,\\quad a_5 = \\dfrac{a_3}{5} = 0,\\quad a_7 = 0,\\;\\ldots$$ <strong>Every odd-indexed $a_{2k+1} = 0$.</strong> <hr class="solution-divider"> <strong>3b. Compute even coefficients.</strong><br> Apply the recurrence $a_{n+1} = a_{n-1}/(n+1)$ with $n = 1, 3, 5, \\ldots$: <br><br> <em>$n=1$:</em> $a_2 = \\dfrac{a_0}{1+1} = \\dfrac{a_0}{2}$. <br> <em>$n=3$:</em> $a_4 = \\dfrac{a_2}{3+1} = \\dfrac{a_0/2}{4} = \\dfrac{a_0}{2 \\cdot 4}$. <br> <em>$n=5$:</em> $a_6 = \\dfrac{a_4}{5+1} = \\dfrac{a_0/(2\\cdot 4)}{6} = \\dfrac{a_0}{2 \\cdot 4 \\cdot 6}$. <br> <em>$n=7$:</em> $a_8 = \\dfrac{a_0}{2 \\cdot 4 \\cdot 6 \\cdot 8}$. <hr class="solution-divider"> <strong>3c. Pattern.</strong><br> The denominator is a product of consecutive even numbers up to $2k$. Factor: $2 \\cdot 4 \\cdot 6 \\cdots (2k) = 2^k\\,k!$ (pull one 2 out of each factor — $k$ of them — leaving $1 \\cdot 2 \\cdots k = k!$). So: $$\\boxed{\\;a_{2k} = \\dfrac{a_0}{2^k\\,k!}\\;,\\quad k = 0, 1, 2, \\ldots\\;}$$ and all odd coefficients are $0$.'
+      },
+      {
+        label: 'Step 4 — Recognize the closed form',
+        why: 'The series has the unmistakable shape of an exponential.',
+        body: '<strong>4a. Assemble the series.</strong><br> Only even terms survive: $$y(x) = \\sum_{k=0}^{\\infty} a_{2k}\\,x^{2k} = \\sum_{k=0}^{\\infty}\\dfrac{a_0}{2^k\\,k!}\\,x^{2k} = a_0\\sum_{k=0}^{\\infty}\\dfrac{x^{2k}}{2^k\\,k!}.$$ <hr class="solution-divider"> <strong>4b. Recognize the exponential.</strong><br> Rewrite $\\dfrac{x^{2k}}{2^k\\,k!} = \\dfrac{1}{k!}\\,(x^2/2)^k$. So: $$y(x) = a_0\\sum_{k=0}^{\\infty}\\dfrac{(x^2/2)^k}{k!}.$$ Compare with $e^u = \\sum u^k / k!$: set $u = x^2/2$. $$\\boxed{\\;y(x) = a_0\\,e^{x^2/2}\\;}$$ where $a_0$ is arbitrary. <hr class="solution-divider"> <strong>4c. Cross-check by differentiation.</strong><br> If $y = a_0 e^{x^2/2}$, then $y\' = a_0 e^{x^2/2} \\cdot x = x y$. So $y\' - xy = 0$. ✓'
+      },
+      {
+        label: 'Step 5 — Radius of convergence via Ratio Test',
+        why: 'Mirrors Step 5 of 5.3 #1 (the $a_0$ prefactor drops out of ratios).',
+        body: '<strong>5a. Set up $c_k$.</strong><br> $$c_k = \\dfrac{a_0\\,x^{2k}}{2^k\\,k!}.$$ <strong>5b. Form the ratio.</strong><br> $$\\dfrac{c_{k+1}}{c_k} = \\dfrac{a_0\\,x^{2(k+1)}}{2^{k+1}(k+1)!} \\cdot \\dfrac{2^k\\,k!}{a_0\\,x^{2k}}.$$ $a_0$ cancels; $2^k/2^{k+1} = 1/2$; $k!/(k+1)! = 1/(k+1)$; $x^{2(k+1)}/x^{2k} = x^2$. So $$\\left|\\dfrac{c_{k+1}}{c_k}\\right| = \\dfrac{x^2}{2(k+1)}.$$ <strong>5c. Take the limit.</strong><br> $$L = \\lim_{k\\to\\infty}\\dfrac{x^2}{2(k+1)} = 0 < 1 \\text{ for all } x.$$ <strong>5d. Interpret.</strong><br> $L < 1$ everywhere, so $\\boxed{R = \\infty}$. (This also matches the fact that $e^{x^2/2}$ is entire — analytic on all of $\\mathbb{R}$.)'
+      }
+    ],
+    answer: '<strong>Recurrence:</strong> $a_1 = 0$ and $a_{n+1} = \\dfrac{a_{n-1}}{n+1}$ for $n \\geq 1$. <br><br> <strong>Closed form:</strong> $y(x) = a_0\\,e^{x^2/2}$, where $a_0$ is arbitrary. <br><br> <strong>Radius of convergence:</strong> $R = \\infty$.'
+  },
+
+  // ===== SECTION 5.4 =====
+  {
+    id: 's54p1',
+    section: '5.4',
+    num: 1,
+    title: 'Euler Equation (Case I): $x^2 y\'\' + 4xy\' + 2y = 0$',
+    prompt: '$x^2 y\'\' + 4xy\' + 2y = 0$ <br> Find the general solution valid on any interval not containing the singular point $x = 0$.',
+    reference: '<span class="title">Euler recipe</span> (1) Match $x^2 y\'\' + \\alpha x y\' + \\beta y = 0$ to read off $\\alpha, \\beta$. (2) Substitute $y = x^r$ and derive the indicial equation $r^2 + (\\alpha - 1)r + \\beta = 0$. (3) Check discriminant $(\\alpha-1)^2 - 4\\beta$: <strong>Case I</strong> ($>0$) distinct real, <strong>Case II</strong> ($=0$) repeated, <strong>Case III</strong> ($<0$) complex.',
+    steps: [
+      {
+        label: 'Step 1 — Identify $\\alpha$ and $\\beta$',
+        why: 'Match the standard Euler form $x^2 y\'\' + \\alpha x y\' + \\beta y = 0$ and read off the parameters. We will use $\\alpha, \\beta$ for the indicial equation and the discriminant.',
+        body: 'Comparing $x^2 y\'\' + 4xy\' + 2y = 0$ with $x^2 y\'\' + \\alpha x y\' + \\beta y = 0$: $$\\alpha = 4, \\qquad \\beta = 2.$$'
+      },
+      {
+        label: 'Step 2 — Substitute $y = x^r$ and derive the indicial equation (full derivation)',
+        why: 'This is the heart of the Euler method. We GUESS $y = x^r$ and hunt for values of $r$ that make it a solution. Why $x^r$? Because in an Euler equation the coefficient of $y^{(k)}$ is $x^k$ times a constant — exactly the right power to cancel the $x^{-k}$ that appears when you differentiate $x^r$ repeatedly. So the whole ODE collapses to a single polynomial in $r$.',
+        body: '<strong>2a. Compute derivatives of $y = x^r$ using the power rule.</strong><br> $$y = x^r,\\qquad y\' = r\\,x^{r-1},\\qquad y\'\' = r(r-1)\\,x^{r-2}.$$ <hr class="solution-divider"> <strong>2b. Plug into $x^2 y\'\' + 4xy\' + 2y = 0$ term by term.</strong><br> <em>Term 1:</em> $x^2 \\cdot y\'\' = x^2 \\cdot r(r-1)\\,x^{r-2} = r(r-1)\\,x^{r}$. <br> <em>Term 2:</em> $4x \\cdot y\' = 4x \\cdot r\\,x^{r-1} = 4r\\,x^r$. <br> <em>Term 3:</em> $2 \\cdot y = 2\\,x^r$. <br><br> Every term ends up as a constant times $x^r$. (This is the magic of the Euler form — $x^2\\cdot x^{r-2} = x^r$ and $x\\cdot x^{r-1} = x^r$ and $x^r = x^r$. They all land on the same power.) <hr class="solution-divider"> <strong>2c. Factor out $x^r$.</strong><br> $$\\bigl[\\,r(r-1) + 4r + 2\\,\\bigr]\\,x^r = 0.$$ For $x > 0$ we have $x^r \\neq 0$, so the bracket must equal $0$: $$r(r-1) + 4r + 2 = 0.$$ <strong>2d. Expand and simplify.</strong><br> $$r^2 - r + 4r + 2 = 0 \\;\\Longrightarrow\\; \\boxed{\\;r^2 + 3r + 2 = 0\\;}$$ This is the <strong>indicial equation</strong>. <hr class="solution-divider"> <strong>2e. Cross-check against the general formula.</strong><br> The course notes (5.4 p.2) derive the indicial equation in general as $r^2 + (\\alpha - 1)r + \\beta = 0$. Plug in our $\\alpha = 4, \\beta = 2$: $$r^2 + (4 - 1)r + 2 = r^2 + 3r + 2.$$ ✓ Matches. <br><br> <strong>Takeaway:</strong> once you have identified $\\alpha$ and $\\beta$, you can jump straight to $r^2 + (\\alpha-1)r + \\beta = 0$ without redoing the substitution. The derivation is here once so you know WHERE the formula comes from.'
+      },
+      {
+        label: 'Step 3 — Discriminant tells us which case',
+        why: 'The three Euler cases correspond to the three possible outcomes of the quadratic $r^2 + (\\alpha - 1)r + \\beta = 0$: two real roots, one repeated, or two complex conjugates.',
+        body: '<strong>3a. Compute the discriminant.</strong><br> For a quadratic $ar^2 + br + c$, the discriminant is $\\Delta = b^2 - 4ac$. Here $a = 1$, $b = \\alpha - 1 = 3$, $c = \\beta = 2$: $$\\Delta = (\\alpha - 1)^2 - 4\\beta = 3^2 - 4(2) = 9 - 8 = 1.$$ <strong>3b. Pick the case.</strong><br> <table style="font-size:0.85em; margin:0.4rem 0;"><tr><th>$\\Delta$</th><th>Case</th><th>Solution form</th></tr><tr><td>$> 0$</td><td>I: distinct real $r_1 \\neq r_2$</td><td>$y = c_1 x^{r_1} + c_2 x^{r_2}$</td></tr><tr><td>$= 0$</td><td>II: repeated $r$</td><td>$y = c_1 x^r + c_2 x^r \\ln x$</td></tr><tr><td>$< 0$</td><td>III: complex $\\lambda \\pm \\mu i$</td><td>$y = x^{\\lambda}\\bigl[c_1 \\cos(\\mu \\ln x) + c_2 \\sin(\\mu \\ln x)\\bigr]$</td></tr></table> Since $\\Delta = 1 > 0$: <strong>Case I</strong> (distinct real roots).'
+      },
+      {
+        label: 'Step 4 — Factor for $r_1, r_2$',
+        why: 'Solve the indicial quadratic by factoring (or quadratic formula if it does not factor nicely).',
+        body: '<strong>4a. Look for factors of the constant term (2) that sum to the middle coefficient (3).</strong><br> $1 \\cdot 2 = 2$ and $1 + 2 = 3$. ✓ So: $$r^2 + 3r + 2 = (r + 1)(r + 2) = 0.$$ <strong>4b. Read off the roots.</strong><br> $$r_1 = -1, \\qquad r_2 = -2.$$ <strong>4c. Sanity check with quadratic formula.</strong><br> $r = \\dfrac{-3 \\pm \\sqrt{1}}{2} = \\dfrac{-3 \\pm 1}{2} = -1$ or $-2$. ✓'
+      },
+      {
+        label: 'Step 5 — Write the general solution (valid for $x > 0$)',
+        why: 'Plug $r_1, r_2$ into the Case I fundamental form. Restrict to $x > 0$ because $x = 0$ is a singular point of every Euler equation (the coefficient $x^2$ vanishes there). For $x < 0$ the analogous solution uses $|x|^{r_1}, |x|^{r_2}$, but typical convention is to state the $x > 0$ answer.',
+        body: '<strong>5a. Plug in.</strong><br> $$y(x) = c_1\\,x^{r_1} + c_2\\,x^{r_2} = c_1\\,x^{-1} + c_2\\,x^{-2}.$$ <strong>5b. Rewrite for clarity.</strong><br> $x^{-1} = 1/x$ and $x^{-2} = 1/x^2$, so: $$\\boxed{\\;y(x) = \\dfrac{c_1}{x} + \\dfrac{c_2}{x^2},\\qquad x > 0.\\;}$$ <strong>5c. Cross-check.</strong><br> Plug $y_1 = x^{-1}$ into the ODE: $y_1\' = -x^{-2}$, $y_1\'\' = 2x^{-3}$. Then $x^2 y_1\'\' + 4x y_1\' + 2 y_1 = x^2(2x^{-3}) + 4x(-x^{-2}) + 2(x^{-1}) = 2x^{-1} - 4x^{-1} + 2x^{-1} = 0$. ✓'
+      }
+    ],
+    answer: '<strong>Indicial:</strong> $r^2 + 3r + 2 = 0 \\Rightarrow r_1 = -1,\\; r_2 = -2$ (Case I). <br><br> <strong>General solution:</strong> $y(x) = \\dfrac{c_1}{x} + \\dfrac{c_2}{x^2}$, $x > 0$.'
+  },
+
+  {
+    id: 's54p3',
+    section: '5.4',
+    num: 3,
+    title: 'Euler Equation: Repeated Root',
+    prompt: '$x^2 y\'\' - 3xy\' + 4y = 0$',
+    reference: null,
+    steps: [
+      {
+        label: 'Step 1 — Identify parameters',
+        why: null,
+        body: '$$\\alpha = -3, \\quad \\beta = 4$$'
+      },
+      {
+        label: 'Step 2 — Indicial equation',
+        why: 'This is Case II — one repeated root.',
+        body: '$$r(r-1) - 3r + 4 = 0 \\;\\;\\Longrightarrow\\;\\; r^2 - 4r + 4 = 0 \\;\\;\\Longrightarrow\\;\\; (r-2)^2 = 0$$ $$r = 2 \\quad\\text{(repeated root)}$$'
+      }
+    ],
+    answer: '$$y = c_1 x^2 + c_2 x^2 \\ln x, \\qquad x > 0$$'
+  },
+
+  {
+    id: 's54p4',
+    section: '5.4',
+    num: 4,
+    title: 'Euler Equation: Repeated Root',
+    prompt: '$x^2 y\'\' - xy\' + y = 0$',
+    reference: null,
+    steps: [
+      {
+        label: 'Step 1 — Identify parameters',
+        why: null,
+        body: '$$\\alpha = -1, \\quad \\beta = 1$$'
+      },
+      {
+        label: 'Step 2 — Indicial equation',
+        why: 'Case II again.',
+        body: '$$r(r-1) - r + 1 = 0 \\;\\;\\Longrightarrow\\;\\; r^2 - 2r + 1 = 0 \\;\\;\\Longrightarrow\\;\\; (r-1)^2 = 0$$ $$r = 1 \\quad\\text{(repeated root)}$$'
+      }
+    ],
+    answer: '$$y = c_1 x + c_2 x \\ln x, \\qquad x > 0$$'
+  },
+
+  {
+    id: 's54p6',
+    section: '5.4',
+    num: 6,
+    title: 'Euler Equation: Complex Roots',
+    prompt: '$2x^2 y\'\' - 4xy\' + 6y = 0$',
+    reference: null,
+    steps: [
+      {
+        label: 'Step 1 — Normalize the equation',
+        why: 'Divide everything by 2 to get standard Euler form.',
+        body: '$$x^2 y\'\' - 2xy\' + 3y = 0 \\qquad (\\alpha = -2,\\;\\beta = 3)$$'
+      },
+      {
+        label: 'Step 2 — Indicial equation',
+        why: null,
+        body: '$$r(r-1) - 2r + 3 = 0 \\;\\;\\Longrightarrow\\;\\; r^2 - 3r + 3 = 0$$'
+      },
+      {
+        label: 'Step 3 — Apply the quadratic formula',
+        why: 'Discriminant $= 9 - 12 = -3 < 0$, so we get complex roots. This is Case III.',
+        body: '$$r = \\frac{3 \\pm \\sqrt{-3}}{2} = \\frac{3}{2} \\pm \\frac{\\sqrt{3}}{2}\\,i$$ So $\\lambda = \\dfrac{3}{2}$ and $\\mu = \\dfrac{\\sqrt{3}}{2}$.'
+      }
+    ],
+    answer: '$$y = c_1 x^{3/2}\\cos\\!\\left(\\frac{\\sqrt{3}}{2}\\ln x\\right) + c_2 x^{3/2}\\sin\\!\\left(\\frac{\\sqrt{3}}{2}\\ln x\\right), \\qquad x > 0$$'
+  },
+
+  {
+    id: 's54p7',
+    section: '5.4',
+    num: 7,
+    title: 'Euler Equation (Case II): $x^2 y\'\' - 5xy\' + 9y = 0$',
+    prompt: '$x^2 y\'\' - 5xy\' + 9y = 0$ <br> Find the general solution valid for $x > 0$.',
+    reference: '<span class="title">Case II — repeated root</span> When $(\\alpha-1)^2 - 4\\beta = 0$, the indicial quadratic has one double root $r_1$. One can show that $y_2 = x^{r_1}\\ln(x)$ is a second linearly independent solution (plugging $y = x^r \\ln x$ into the Euler expression produces $F(r)x^r \\ln x + F\'(r)x^r$, which vanishes at $r = r_1$ because $F(r_1) = F\'(r_1) = 0$). General form: $y = (c_1 + c_2 \\ln x)\\,x^{r_1}$.',
+    steps: [
+      {
+        label: 'Step 1 — Identify $\\alpha$ and $\\beta$',
+        why: 'Match the standard Euler form.',
+        body: 'Comparing $x^2 y\'\' - 5xy\' + 9y = 0$ with $x^2 y\'\' + \\alpha x y\' + \\beta y = 0$: $$\\alpha = -5, \\qquad \\beta = 9.$$ <strong>Sign caution:</strong> the middle coefficient is $-5$, so $\\alpha = -5$ (negative). Easy place to slip up.'
+      },
+      {
+        label: 'Step 2 — Substitute $y = x^r$ and derive the indicial equation',
+        why: 'Same derivation as 5.4 #1 (see that problem for full substitution details). Here we just run through it.',
+        body: '<strong>2a. Substitute.</strong><br> $y = x^r$: $y\' = r x^{r-1}$, $y\'\' = r(r-1)x^{r-2}$. Plug in: $$x^2\\cdot r(r-1)x^{r-2} - 5x\\cdot r\\,x^{r-1} + 9\\,x^r = 0$$ $$[\\,r(r-1) - 5r + 9\\,]\\,x^r = 0.$$ <strong>2b. Expand and simplify.</strong><br> $r(r-1) = r^2 - r$, so the bracket is: $$r^2 - r - 5r + 9 = r^2 - 6r + 9.$$ Indicial equation: $$\\boxed{\\;r^2 - 6r + 9 = 0\\;}$$ <strong>2c. Cross-check with general formula.</strong><br> $r^2 + (\\alpha - 1)r + \\beta = r^2 + (-5 - 1)r + 9 = r^2 - 6r + 9$. ✓'
+      },
+      {
+        label: 'Step 3 — Discriminant $\\to$ Case II',
+        why: 'A zero discriminant forces a repeated root, which triggers the special Case II solution form.',
+        body: '<strong>3a. Compute $\\Delta$.</strong><br> $$\\Delta = (\\alpha - 1)^2 - 4\\beta = (-6)^2 - 4(9) = 36 - 36 = 0.$$ <strong>3b. Pick the case.</strong><br> $\\Delta = 0$ means ONE repeated real root. This is <strong>Case II</strong>. <br><br> General fundamental set for Case II: $\\{x^{r_1},\\; x^{r_1}\\ln x\\}$. Two linearly independent solutions, even though the indicial quadratic gave us only one $r$.'
+      },
+      {
+        label: 'Step 4 — Why is $y_2 = x^{r_1}\\ln x$ the second solution? (derivation from 5.4 p.4)',
+        why: 'Case II is the only Euler case where the indicial equation alone does not directly hand you both solutions. One can derive why multiplying by $\\ln x$ recovers the second one. Worth understanding, not just memorizing.',
+        body: '<strong>4a. Setup.</strong><br> For the Euler equation, the substitution $y = x^r$ makes the ODE become $F(r)\\,x^r = 0$, where $F(r) = r^2 + (\\alpha - 1)r + \\beta$ is the indicial polynomial. <br><br> In Case II, $F(r) = (r - r_1)^2$ — so BOTH $F(r_1) = 0$ AND $F\'(r_1) = 0$ (double root ⇒ polynomial and its derivative both vanish there). <hr class="solution-divider"> <strong>4b. Try $y = x^r \\ln(x)$.</strong><br> Compute derivatives using product rule and the fact that $\\dfrac{d}{dx}\\ln x = 1/x$. After straightforward algebra (see notes 5.4 p.4), plugging $y = x^r \\ln x$ into the Euler equation gives: $$F(r)\\,x^r\\,\\ln(x) + F\'(r)\\,x^r = 0.$$ <strong>4c. Evaluate at $r = r_1$.</strong><br> At the repeated root both $F(r_1) = 0$ and $F\'(r_1) = 0$, so both terms vanish — $y_2 = x^{r_1}\\ln x$ IS a solution. <hr class="solution-divider"> <strong>4d. Linear independence.</strong><br> $y_1 = x^{r_1}$ and $y_2 = x^{r_1}\\ln x$ differ by a factor of $\\ln x$, which is nonconstant, so they are linearly independent. A Wronskian computation confirms $W[y_1, y_2] = x^{2r_1 - 1} \\neq 0$ for $x > 0$. <hr class="solution-divider"> <strong>Rule to remember:</strong> When the indicial equation has a repeated root $r_1$, append $\\ln x$ to get the second solution — $y_2 = x^{r_1}\\ln x$.'
+      },
+      {
+        label: 'Step 5 — Solve the indicial equation',
+        why: 'Factor (easy since $\\Delta = 0$ forces a perfect square).',
+        body: '<strong>5a. Spot the perfect square.</strong><br> $r^2 - 6r + 9$ is $(r - 3)^2$ (since $-3 \\cdot -3 = 9$ and $-3 + -3 = -6$). $$(r - 3)^2 = 0 \\;\\Longrightarrow\\; r_1 = 3 \\text{ (repeated)}.$$ <strong>5b. Sanity check.</strong><br> Quadratic formula: $r = \\dfrac{6 \\pm \\sqrt{0}}{2} = 3$ (doubled). ✓'
+      },
+      {
+        label: 'Step 6 — Write the general solution',
+        why: 'Apply the Case II fundamental set with $r_1 = 3$. Restrict to $x > 0$ because $\\ln x$ is only defined for positive $x$ and because $x = 0$ is a singular point.',
+        body: '<strong>6a. Plug in.</strong><br> $$y(x) = c_1\\,x^{r_1} + c_2\\,x^{r_1}\\,\\ln(x) = c_1\\,x^3 + c_2\\,x^3\\,\\ln(x).$$ <strong>6b. Factor.</strong><br> $$\\boxed{\\;y(x) = (c_1 + c_2\\,\\ln x)\\,x^3,\\qquad x > 0.\\;}$$ <strong>6c. Cross-check $y_1 = x^3$.</strong><br> $y_1\' = 3x^2$, $y_1\'\' = 6x$. Then $x^2(6x) - 5x(3x^2) + 9(x^3) = 6x^3 - 15x^3 + 9x^3 = 0$. ✓'
+      }
+    ],
+    answer: '<strong>Indicial:</strong> $(r-3)^2 = 0 \\Rightarrow r_1 = 3$ (Case II, repeated). <br><br> <strong>General solution:</strong> $y(x) = (c_1 + c_2 \\ln x)\\,x^3$, $x > 0$.'
+  },
+
+  {
+    id: 's54p13',
+    section: '5.4',
+    num: 13,
+    title: 'Classify Singular Points',
+    prompt: '$x^2(1-x)^2 y\'\' + 2xy\' + 4y = 0$ <br> Find all singular points and classify each as regular or irregular.',
+    reference: '<span class="title">Classification Rule</span> Given $P(x)y\'\' + Q(x)y\' + R(x)y = 0$, a singular point $x_0$ (where $P(x_0)=0$) is <strong>regular</strong> if both: $$\\lim_{x\\to x_0}(x - x_0)\\,\\frac{Q(x)}{P(x)} \\quad\\text{and}\\quad \\lim_{x\\to x_0}(x-x_0)^2\\,\\frac{R(x)}{P(x)}$$ are finite. Otherwise it is <strong>irregular</strong>.',
+    steps: [
+      {
+        label: 'Step 1 — Find the singular points',
+        why: 'Set $P(x) = x^2(1-x)^2 = 0$. This gives $x = 0$ and $x = 1$.',
+        body: ''
+      },
+      {
+        label: 'Step 2 — Compute $p(x)$ and $q(x)$',
+        why: null,
+        body: '$$p(x) = \\frac{Q(x)}{P(x)} = \\frac{2x}{x^2(1-x)^2} = \\frac{2}{x(1-x)^2}$$ $$q(x) = \\frac{R(x)}{P(x)} = \\frac{4}{x^2(1-x)^2}$$'
+      },
+      {
+        label: 'Step 3 — Test $x_0 = 0$',
+        why: 'Check if $(x-0)\\,p(x)$ and $(x-0)^2\\,q(x)$ have finite limits as $x \\to 0$.',
+        body: '$$x \\cdot p(x) = x \\cdot \\frac{2}{x(1-x)^2} = \\frac{2}{(1-x)^2} \\;\\;\\xrightarrow{x\\to 0}\\;\\; 2 \\quad\\checkmark$$ $$x^2 \\cdot q(x) = x^2 \\cdot \\frac{4}{x^2(1-x)^2} = \\frac{4}{(1-x)^2} \\;\\;\\xrightarrow{x\\to 0}\\;\\; 4 \\quad\\checkmark$$ Both finite — $x = 0$ is a <strong>regular singular point</strong>.'
+      },
+      {
+        label: 'Step 4 — Test $x_0 = 1$',
+        why: 'Now check the limits as $x \\to 1$.',
+        body: '$$(x-1)\\cdot p(x) = (x-1) \\cdot \\frac{2}{x(1-x)^2}$$ Note $(x-1) = -(1-x)$, so: $$= \\frac{-(1-x) \\cdot 2}{x(1-x)^2} = \\frac{-2}{x(1-x)} \\;\\;\\xrightarrow{x\\to 1}\\;\\; \\frac{-2}{1 \\cdot 0} \\;=\\; \\pm\\infty \\quad\\boldsymbol{\\times}$$ The first limit already diverges, so $x = 1$ is an <strong>irregular singular point</strong>.'
+      }
+    ],
+    answer: '$x = 0$ is a <strong>regular</strong> singular point. $x = 1$ is an <strong>irregular</strong> singular point.'
+  },
+
+  {
+    id: 's54p14',
+    section: '5.4',
+    num: 14,
+    title: 'Classify Singular Points (Mixed Case)',
+    prompt: '$x^2(1-x)y\'\' + (x-2)y\' - 3xy = 0$ <br> Find all singular points and classify each as regular or irregular.',
+    reference: '<span class="title">Classification rule</span> A singular point $x_0$ of $P(x)y\'\' + Q(x)y\' + R(x)y = 0$ is <strong>regular</strong> iff BOTH $$\\lim_{x \\to x_0}(x - x_0)\\dfrac{Q(x)}{P(x)} \\quad\\text{and}\\quad \\lim_{x \\to x_0}(x - x_0)^2\\,\\dfrac{R(x)}{P(x)}$$ are finite. If either diverges, $x_0$ is <strong>irregular</strong>.',
+    steps: [
+      {
+        label: 'Step 1 — Identify $P, Q, R$ and find the singular points',
+        why: 'For a standard-form ODE $P(x)y\'\' + Q(x)y\' + R(x)y = 0$, a <strong>singular point</strong> is any $x_0$ where $P(x_0) = 0$ (the leading coefficient vanishes). These need separate analysis because the normalization $y\'\' + p\\,y\' + q\\,y = 0$ blows up there.',
+        body: '<strong>1a. Read off $P, Q, R$.</strong><br> $$P(x) = x^2(1-x), \\quad Q(x) = x - 2, \\quad R(x) = -3x.$$ <strong>1b. Solve $P(x) = 0$.</strong><br> $x^2(1 - x) = 0 \\Leftrightarrow x^2 = 0$ or $1 - x = 0$. So $x = 0$ (double root — but still one singular point) or $x = 1$. <br><br> <strong>Two singular points to classify:</strong> $x_0 = 0$ and $x_0 = 1$.'
+      },
+      {
+        label: 'Step 2 — Form $p(x) = Q/P$ and $q(x) = R/P$',
+        why: 'The classification rule is stated in terms of $p$ and $q$ from the normalized form $y\'\' + p(x)y\' + q(x)y = 0$. Normalize once, then test at each singular point.',
+        body: '<strong>2a. Divide.</strong><br> $$p(x) = \\dfrac{Q}{P} = \\dfrac{x-2}{x^2(1-x)}.$$ $$q(x) = \\dfrac{R}{P} = \\dfrac{-3x}{x^2(1-x)} = \\dfrac{-3}{x(1-x)}.$$ (Cancelled an $x$ from $R$ and $P$ in $q$.) <hr class="solution-divider"> <strong>2b. The classification rule.</strong><br> $x_0$ is a <strong>regular singular point</strong> if BOTH limits are finite: $$\\lim_{x \\to x_0}(x - x_0)\\,p(x) \\quad \\text{and} \\quad \\lim_{x \\to x_0}(x - x_0)^2\\,q(x).$$ If either limit is infinite (or does not exist), $x_0$ is <strong>irregular</strong>.'
+      },
+      {
+        label: 'Step 3 — Test $x_0 = 0$ (first limit, every algebra move shown)',
+        why: 'The first limit is $\\lim_{x \\to x_0}(x - x_0)\\cdot p(x)$. Here $x_0 = 0$, so the factor in front is just $x$. If this limit is finite we move on to test the second; if it blows up we can declare irregular immediately.',
+        body: '<strong>3a. Write the limit expression with $x_0 = 0$ substituted.</strong><br> $(x - x_0)\\cdot p(x)$ with $x_0 = 0$ becomes: $$(x - 0)\\cdot p(x) = x \\cdot p(x).$$ <hr class="solution-divider"> <strong>3b. Substitute $p(x)$ from Step 2a.</strong><br> From Step 2: $p(x) = \\dfrac{x - 2}{x^2(1 - x)}$. So: $$x \\cdot p(x) = x \\cdot \\dfrac{x - 2}{x^2(1 - x)}.$$ <hr class="solution-divider"> <strong>3c. Multiply numerator.</strong><br> Moving the single $x$ in front into the numerator of the fraction: $$= \\dfrac{x \\cdot (x - 2)}{x^2(1 - x)} = \\dfrac{x(x - 2)}{x^2(1 - x)}.$$ <hr class="solution-divider"> <strong>3d. Cancel a common factor of $x$.</strong><br> Numerator has $x$, denominator has $x^2 = x \\cdot x$. Cancel one $x$ from each: $$\\dfrac{\\cancel{x}(x - 2)}{\\cancel{x} \\cdot x \\cdot (1 - x)} = \\dfrac{x - 2}{x(1 - x)}.$$ <hr class="solution-divider"> <strong>3e. Now take the limit as $x \\to 0$.</strong> Handle numerator and denominator separately so you can diagnose exactly what happens. <br><br> <em>Numerator as $x \\to 0$:</em> $$\\lim_{x \\to 0}(x - 2) = 0 - 2 = -2.$$ Finite, nonzero. <br><br> <em>Denominator as $x \\to 0$:</em> $$\\lim_{x \\to 0} x(1 - x) = (0)(1 - 0) = 0 \\cdot 1 = 0.$$ Denominator approaches $0$. <hr class="solution-divider"> <strong>3f. Form the ratio and diagnose.</strong><br> The numerator approaches $-2$ (nonzero) while the denominator approaches $0$. A nonzero number divided by something going to $0$ blows up — the limit does not exist (or is $\\pm \\infty$, depending on the sign from which we approach): $$\\lim_{x \\to 0}\\dfrac{x - 2}{x(1 - x)} = \\dfrac{-2}{0^{+/-}} \\;\\longrightarrow\\; \\pm\\infty.$$ <strong>First limit diverges. ✗</strong> <hr class="solution-divider"> <strong>3g. Conclude for $x_0 = 0$.</strong><br> The classification rule requires BOTH limits to be finite for a regular singular point. Since the first one already failed, the second does not matter. $$\\boxed{\\;x = 0 \\text{ is an IRREGULAR singular point.}\\;}$$ We skip the second limit and move on to test $x_0 = 1$.'
+      },
+      {
+        label: 'Step 4 — Test $x_0 = 1$ (first limit, every algebra move shown)',
+        why: 'Now we switch to the other candidate singular point. The structure is the same, but this time the factor we multiply by is $(x - 1)$. The denominator of $p(x)$ contains $(1 - x)$, not $(x - 1)$, so direct cancellation fails. We use the identity $(1 - x) = -(x - 1)$ to flip the sign and cancel.',
+        body: '<strong>4a. Write the limit expression with $x_0 = 1$.</strong><br> $(x - x_0)\\cdot p(x)$ with $x_0 = 1$: $$(x - 1)\\cdot p(x).$$ <hr class="solution-divider"> <strong>4b. Substitute $p(x)$.</strong><br> $$(x - 1) \\cdot \\dfrac{x - 2}{x^2(1 - x)}.$$ <strong>4c. Combine into one fraction.</strong><br> Move $(x - 1)$ into the numerator: $$\\dfrac{(x - 1)(x - 2)}{x^2(1 - x)}.$$ <hr class="solution-divider"> <strong>4d. Problem: $(x - 1)$ is on top, $(1 - x)$ is on bottom.</strong><br> These are NOT the same — they differ by a sign. They will not cancel as-is. We need to make them match. <strong>4e. Use the identity $(1 - x) = -(x - 1)$.</strong><br> Why this is true: $(1 - x) = -(x - 1)$ because expanding the right side gives $-x + 1 = 1 - x$. So substituting in the denominator: $$\\dfrac{(x - 1)(x - 2)}{x^2 \\cdot \\bigl[-(x - 1)\\bigr]}.$$ <strong>4f. Pull the negative sign out front.</strong><br> $$= \\dfrac{(x - 1)(x - 2)}{-x^2 (x - 1)} = -\\dfrac{(x - 1)(x - 2)}{x^2 (x - 1)}.$$ <hr class="solution-divider"> <strong>4g. Now the $(x - 1)$ factors cancel.</strong><br> $$-\\dfrac{\\cancel{(x - 1)}(x - 2)}{x^2 \\cancel{(x - 1)}} = -\\dfrac{x - 2}{x^2}.$$ <strong>4h. Clean up the sign (optional — distribute the minus).</strong><br> $-\\dfrac{x - 2}{x^2} = \\dfrac{-(x - 2)}{x^2} = \\dfrac{-x + 2}{x^2} = \\dfrac{2 - x}{x^2}.$ <hr class="solution-divider"> <strong>4i. Take the limit as $x \\to 1$.</strong> Numerator and denominator separately: <br><br> <em>Numerator:</em> $\\lim_{x \\to 1}(2 - x) = 2 - 1 = 1.$ <br> <em>Denominator:</em> $\\lim_{x \\to 1}x^2 = 1^2 = 1.$ <br><br> <em>Ratio:</em> $$\\lim_{x \\to 1}\\dfrac{2 - x}{x^2} = \\dfrac{1}{1} = 1.$$ <strong>First limit is $1$ — finite. ✓</strong> Proceed to the second limit.'
+      },
+      {
+        label: 'Step 5 — Test $x_0 = 1$ (second limit, every algebra move shown)',
+        why: 'Second limit is $\\lim_{x \\to x_0}(x - x_0)^2 \\cdot q(x)$. Same sign-flip trick as Step 4, just with $(x - 1)^2$ instead of $(x - 1)$.',
+        body: '<strong>5a. Write the limit expression.</strong><br> $$(x - 1)^2 \\cdot q(x).$$ <strong>5b. Substitute $q(x)$ from Step 2a.</strong><br> From Step 2: $q(x) = \\dfrac{-3}{x(1 - x)}$. So: $$(x - 1)^2 \\cdot \\dfrac{-3}{x(1 - x)} = \\dfrac{(x - 1)^2 \\cdot (-3)}{x(1 - x)} = \\dfrac{-3(x - 1)^2}{x(1 - x)}.$$ <hr class="solution-divider"> <strong>5c. Flip the sign on $(1 - x)$.</strong><br> Use $(1 - x) = -(x - 1)$ in the denominator: $$\\dfrac{-3(x - 1)^2}{x \\cdot \\bigl[-(x - 1)\\bigr]} = \\dfrac{-3(x - 1)^2}{-x(x - 1)}.$$ <strong>5d. Simplify the two minus signs.</strong><br> A minus on top and a minus on bottom cancel: $$\\dfrac{-3(x - 1)^2}{-x(x - 1)} = \\dfrac{3(x - 1)^2}{x(x - 1)}.$$ <strong>5e. Cancel one factor of $(x - 1)$.</strong><br> Numerator has $(x - 1)^2 = (x-1)(x-1)$; denominator has one $(x-1)$. Cancel one from each: $$\\dfrac{3\\cancel{(x - 1)}(x - 1)}{x \\cancel{(x - 1)}} = \\dfrac{3(x - 1)}{x}.$$ <hr class="solution-divider"> <strong>5f. Take the limit as $x \\to 1$.</strong><br> <em>Numerator:</em> $\\lim_{x \\to 1} 3(x - 1) = 3(1 - 1) = 3(0) = 0.$ <br> <em>Denominator:</em> $\\lim_{x \\to 1} x = 1.$ <br><br> <em>Ratio:</em> $$\\lim_{x \\to 1}\\dfrac{3(x - 1)}{x} = \\dfrac{0}{1} = 0.$$ <strong>Second limit is $0$ — finite. ✓</strong> <hr class="solution-divider"> <strong>5g. Both limits at $x_0 = 1$ are finite.</strong><br> First limit = $1$, second limit = $0$. Both exist and are finite numbers. $$\\boxed{\\;x = 1 \\text{ is a REGULAR singular point.}\\;}$$'
+      },
+      {
+        label: 'Step 6 — Final classification (summary table)',
+        why: 'Collect the results for both singular points in one place.',
+        body: '<table style="font-size:0.95em; margin:0.4rem 0;"><tr><th>$x_0$</th><th>First limit $(x-x_0)\\,p(x)$</th><th>Second limit $(x-x_0)^2\\,q(x)$</th><th>Verdict</th></tr><tr><td>$0$</td><td>diverges to $\\pm\\infty$ ✗</td><td>not tested</td><td><strong>irregular</strong></td></tr><tr><td>$1$</td><td>$= 1$ ✓ finite</td><td>$= 0$ ✓ finite</td><td><strong>regular</strong></td></tr></table> $$\\boxed{\\;x = 0 \\text{ irregular}; \\quad x = 1 \\text{ regular}.\\;}$$ <hr class="solution-divider"> <strong>Mental model for fast classification:</strong> Look at how hard $P$ vanishes at $x_0$ compared to $Q$ and $R$. For a regular singular point: the zero of $P$ at $x_0$ must be compensated by at most one factor of $(x - x_0)$ for $Q$, and two factors for $R$. If $P$ vanishes faster than that, the point is irregular. <br><br> Here: at $x = 0$, $P$ has a <em>double</em> zero ($x^2$), but $Q(0) = -2 \\neq 0$, so $Q/P \\sim 1/x^2$ — too singular for a single $(x - 0)$ to tame. At $x = 1$, $P$ has a simple zero and $(x - 1), (x - 1)^2$ are enough to absorb the singularity.'
+      }
+    ],
+    answer: '$x = 0$ is an <strong>irregular</strong> singular point. $x = 1$ is a <strong>regular</strong> singular point.'
+  }
+];
+
+// ===== DOM Rendering & Initialization =====
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.getElementById('problems-container');
+  const progressContainer = document.getElementById('progress-container');
+  const resetBtn = document.getElementById('reset-btn');
+  const tocList = document.getElementById('toc-list');
+
+  // Build TOC
+  const sections = [
+    { title: 'Section 5.3 — Series Solutions Near Ordinary Points, Part II', id: 's5.3' },
+    { title: 'Section 5.4 — Euler Equations; Regular Singular Points', id: 's5.4' }
+  ];
+
+  let currentSection = null;
+  PROBLEMS.forEach((prob) => {
+    const section = sections.find((s) => s.title.includes(prob.section.split('.')[0]));
+    if (!section) return;
+
+    if (currentSection !== section.id) {
+      const header = document.createElement('h2');
+      header.className = 'section-header';
+      header.textContent = section.title;
+      container.appendChild(header);
+      currentSection = section.id;
+
+      // Add section header to TOC
+      const li = document.createElement('li');
+      li.className = 'sec';
+      li.textContent = section.title;
+      tocList.appendChild(li);
+    }
+
+    // TOC link
+    const link = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = `#${prob.id}`;
+    a.textContent = `Problem ${prob.section} #${prob.num}`;
+    link.appendChild(a);
+    tocList.appendChild(link);
+  });
+
+  // Render all problem cards
+  PROBLEMS.forEach((prob) => {
+    TutorCore.renderProblem(prob, container, {
+      quizMode: false,
+      onComplete: () => {
+        updateUIProgress();
+        TutorCore.updateTOC(PROBLEMS.map((p) => p.id));
+      }
+    });
+  });
+
+  // Set up progress tracking
+  function updateUIProgress() {
+    progressContainer.style.display = 'block';
+    TutorCore.updateProgress(progressContainer, PROBLEMS.map((p) => p.id));
+  }
+
+  // Reset button
+  resetBtn.addEventListener('click', () => {
+    if (confirm('Clear all progress?')) {
+      TutorCore.resetProgress();
+      location.reload();
+    }
+  });
+
+  // Initialize progress
+  updateUIProgress();
+  TutorCore.updateTOC(PROBLEMS.map((p) => p.id));
+});
+</script>
+
+<div class="cs-companion-link">
+  <span>📄 Companion Reference:</span>
+  <a href="problems_series_solutions.html">Series &amp; Euler Quick Reference →</a>
+</div>
+
+</body>
+</html>

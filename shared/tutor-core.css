@@ -1,0 +1,444 @@
+/* Tutor Core CSS — shared across all subject modules (statics, diffeq, circuits, etc.)
+   Extracted from proven homework styling to ensure visual consistency across all homework files */
+
+:root {
+  /* Dark theme palette */
+  --bg: #0f1117;
+  --card: #181b23;
+  --border: #2a2d38;
+  --accent: #6c9cfc;
+  --accent2: #a78bfa;
+  --green: #4ade80;
+  --text: #e2e4ea;
+  --dim: #8b8fa4;
+  --answer-bg: #1a2636;
+  --answer-border: #2d4a6f;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.subtitle {
+  color: var(--dim);
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+.section-header {
+  color: var(--accent);
+  font-size: 1.4rem;
+  margin: 2rem 0 1rem 0;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.question-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.question-card h2 {
+  color: var(--accent2);
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.problem-statement {
+  background: #1e2029;
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95rem;
+}
+
+.step {
+  margin: 0.8rem 0;
+  padding-left: 1rem;
+}
+
+.step-label {
+  color: var(--green);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.why-box {
+  background: #1a1a2e;
+  border-left: 3px solid var(--accent2);
+  padding: 0.6rem 1rem;
+  margin: 0.5rem 0;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9rem;
+  color: #c4b5fd;
+}
+
+.why-box strong {
+  color: var(--accent2);
+}
+
+.answer-box {
+  background: var(--answer-bg);
+  border: 1px solid var(--answer-border);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-top: 1rem;
+}
+
+.answer-box .label {
+  color: var(--green);
+  font-weight: 700;
+  margin-right: 0.4rem;
+}
+
+.sub-problem {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.sub-problem:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.note {
+  color: var(--dim);
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.status-badge {
+  display: inline-block;
+  background: #1a2e1a;
+  border: 1px solid #2d5c30;
+  color: var(--green);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  margin-left: 0.8rem;
+  vertical-align: middle;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  border: 1px solid var(--border);
+}
+
+th {
+  background: #1e2029;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+td {
+  font-size: 0.95rem;
+}
+
+.katex {
+  font-size: 1.1em !important;
+}
+
+.solution-divider {
+  border: none;
+  border-top: 1px dashed var(--border);
+  margin: 1.2rem 0;
+}
+
+canvas {
+  display: block;
+  margin: 1rem auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #12141c;
+}
+
+.plot-label {
+  text-align: center;
+  color: var(--dim);
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+p { margin: 0.6rem 0; }
+ul, ol { padding-left: 1.5rem; margin: 0.6rem 0; }
+li { margin: 0.3rem 0; }
+
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.progress-container {
+  background: #121521;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  color: var(--dim);
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+  background: var(--border);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, var(--green), var(--accent));
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+}
+
+.reset-progress-btn {
+  background: var(--border);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
+
+.reset-progress-btn:hover {
+  background: #f87171;
+  border-color: #f87171;
+  color: white;
+}
+
+.toc {
+  background: #121521;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.toc h3 {
+  color: var(--accent);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.toc ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+.toc li {
+  margin: 0.3rem 0;
+  font-size: 0.92rem;
+}
+
+.toc a {
+  color: var(--accent2);
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+.toc .sec {
+  color: var(--dim);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.8rem;
+  font-weight: 700;
+}
+
+.toc-check {
+  color: var(--green);
+  margin-right: 0.4rem;
+}
+
+.badge-label {
+  display: inline-block;
+  background: #1a1a2e;
+  border: 1px solid #2d2d5c;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  margin-left: 0.8rem;
+  vertical-align: middle;
+}
+
+.mark-complete-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  color: var(--dim);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.quiz-toggle-btn {
+  background: var(--border);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quiz-toggle-btn:hover {
+  background: var(--accent2);
+  color: var(--bg);
+  border-color: var(--accent2);
+}
+
+.card-header-right {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.step-reveal-btn {
+  background: none;
+  border: none;
+  color: var(--green);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.step-reveal-btn:hover {
+  color: var(--accent);
+}
+
+.step-body.hidden {
+  display: none;
+}
+
+.answer-box.hidden {
+  display: none;
+}
+
+.reference-box {
+  background: #1b1520;
+  border: 1px solid #3d2d5c;
+  border-left: 4px solid var(--accent2);
+  border-radius: 0 10px 10px 0;
+  margin: 1.2rem 0;
+  padding: 1rem 1.2rem;
+}
+
+.reference-box .title {
+  display: block;
+  color: var(--accent2);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+strong {
+  color: #fff;
+}
+
+.legend {
+  background: #121521;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.legend h3 {
+  color: var(--accent);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.legend .item {
+  margin: 0.3rem 0;
+}
+
+.companion-link {
+  padding: 12px;
+  margin: 20px 0;
+  text-align: center;
+  font-size: 0.95em;
+  border-top: 2px solid var(--accent);
+  padding-top: 20px;
+}
+
+.companion-link a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.companion-link a:hover {
+  text-decoration: underline;
+}
