@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="forged.css">
   <style>
 /* ===== EMBEDDED CHEATSHEET CORE CSS ===== */
 /* Cheatsheet Core CSS — shared across all subject modules
@@ -144,14 +145,14 @@
 
 /* ===== DARK-INTERACTIVE THEME (DEFAULT) ===== */
 [data-theme="dark"],
-body { /* default to dark */
-  --bg: #1a1a2e;
-  --bg2: #16213e;
-  --bg3: #0f3460;
-  --accent: #e94560;
-  --accent2: #533483;
-  --text: #e0e0e0;
-  --dim: #a0a0b8;
+body { /* default to dark — palette aligned to forged-kit (arath.site) tokens */
+  --bg: #030201;                     /* fk-bg */
+  --bg2: #090706;                    /* fk-surface */
+  --bg3: rgba(255, 136, 0, 0.1);     /* orange-tint fill (was #0f3460) */
+  --accent: #FF8800;                 /* fk-accent */
+  --accent2: #994400;                /* fk-accent-deep (was purple) */
+  --text: #e0e0e0;                   /* fk-text */
+  --dim: #9ca3af;                    /* fk-text-dim */
   --mono: 'Consolas', 'Courier New', 'Liberation Mono', monospace;
 
   margin: 0;
@@ -322,7 +323,7 @@ h2 {
 }
 
 h3 {
-  color: #7ec8e3;
+  color: rgba(255, 136, 0, 0.75); /* fk-accent-dim (was cyan) */
   margin-top: 1rem;
   margin-bottom: 0.5rem;
 }
@@ -379,9 +380,18 @@ mark.hl {
 p { margin: 0.5rem 0; }
 ul, ol { padding-left: 1.2rem; margin: 0.5rem 0; }
 li { margin: 0.3rem 0; }
+
+/* forged-kit chrome: hide the dark-site band in the white print-compact theme */
+[data-theme="print"] .fk-header,
+[data-theme="print"] .fk-footer { display: none !important; }
   </style>
 </head>
-<body data-theme="dark">
+<body data-theme="dark" class="fk-page">
+
+<header class="fk-header">
+  <span class="fk-header-title">diffeq-tutor</span>
+  <a class="fk-header-link" href="https://www.arath.site/forged/tools">Forged Tools</a>
+</header>
 
 <h1>Differential Equations</h1>
 <p class="subtitle">Quick Reference: Series Solutions & Euler Equations</p>
@@ -722,6 +732,10 @@ li { margin: 0.3rem 0; }
     });
   });
 </script>
+
+<footer class="fk-footer">
+  <a href="https://www.arath.site">A Forged Tool &middot; &copy; Arath Industries</a>
+</footer>
 
 </body>
 </html>

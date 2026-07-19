@@ -2,17 +2,18 @@
    Extracted from proven homework styling to ensure visual consistency across all homework files */
 
 :root {
-  /* Dark theme palette */
-  --bg: #0f1117;
-  --card: #181b23;
-  --border: #2a2d38;
-  --accent: #6c9cfc;
-  --accent2: #a78bfa;
+  /* Dark theme palette — aligned to forged-kit (arath.site) tokens.
+     --green intentionally held back: semantic completion/success marker. */
+  --bg: #030201;                       /* fk-bg */
+  --card: rgba(13, 11, 10, 0.6);       /* fk-card-bg */
+  --border: rgba(255, 136, 0, 0.12);   /* fk-border-soft */
+  --accent: #FF8800;                   /* fk-accent */
+  --accent2: rgba(255, 136, 0, 0.7);   /* fk-accent-dim (was purple) */
   --green: #4ade80;
-  --text: #e2e4ea;
-  --dim: #8b8fa4;
-  --answer-bg: #1a2636;
-  --answer-border: #2d4a6f;
+  --text: #e0e0e0;                     /* fk-text */
+  --dim: #9ca3af;                      /* fk-text-dim */
+  --answer-bg: rgba(255, 136, 0, 0.06);
+  --answer-border: rgba(255, 136, 0, 0.35); /* fk-border-strong */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -64,7 +65,7 @@ h1 {
 }
 
 .problem-statement {
-  background: #1e2029;
+  background: #090706; /* fk-surface */
   border-left: 3px solid var(--accent);
   padding: 1rem 1.2rem;
   margin-bottom: 1.2rem;
@@ -86,13 +87,13 @@ h1 {
 }
 
 .why-box {
-  background: #1a1a2e;
+  background: #0d0b0a;
   border-left: 3px solid var(--accent2);
   padding: 0.6rem 1rem;
   margin: 0.5rem 0;
   border-radius: 0 6px 6px 0;
   font-size: 0.9rem;
-  color: #c4b5fd;
+  color: #ffcf9e;
 }
 
 .why-box strong {
@@ -160,7 +161,7 @@ th, td {
 }
 
 th {
-  background: #1e2029;
+  background: #090706; /* fk-surface */
   color: var(--accent);
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -186,7 +187,7 @@ canvas {
   margin: 1rem auto;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #12141c;
+  background: #090706; /* fk-surface */
 }
 
 .plot-label {
@@ -208,7 +209,7 @@ li { margin: 0.3rem 0; }
 }
 
 .progress-container {
-  background: #121521;
+  background: #090706; /* fk-surface */
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1rem 1.2rem;
@@ -230,7 +231,7 @@ li { margin: 0.3rem 0; }
 }
 
 .progress-fill {
-  background: linear-gradient(90deg, var(--green), var(--accent));
+  background: linear-gradient(90deg, #994400, #FF8800); /* fk-accent-deep → fk-accent */
   height: 100%;
   transition: width 0.3s ease;
 }
@@ -261,7 +262,7 @@ li { margin: 0.3rem 0; }
 }
 
 .toc {
-  background: #121521;
+  background: #090706; /* fk-surface */
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1rem 1.5rem;
@@ -309,8 +310,8 @@ li { margin: 0.3rem 0; }
 
 .badge-label {
   display: inline-block;
-  background: #1a1a2e;
-  border: 1px solid #2d2d5c;
+  background: rgba(255, 136, 0, 0.08); /* fk-chip-bg */
+  border: 1px solid rgba(255, 136, 0, 0.35);
   color: var(--accent);
   font-size: 0.75rem;
   font-weight: 700;
@@ -383,8 +384,8 @@ li { margin: 0.3rem 0; }
 }
 
 .reference-box {
-  background: #1b1520;
-  border: 1px solid #3d2d5c;
+  background: #0d0b0a;
+  border: 1px solid rgba(255, 136, 0, 0.2);
   border-left: 4px solid var(--accent2);
   border-radius: 0 10px 10px 0;
   margin: 1.2rem 0;
@@ -406,7 +407,7 @@ strong {
 }
 
 .legend {
-  background: #121521;
+  background: #090706; /* fk-surface */
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1rem 1.2rem;
