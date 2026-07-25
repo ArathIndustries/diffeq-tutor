@@ -19,14 +19,21 @@
   /* --- Color: text --- */
   --fk-text: #e0e0e0;                     /* primary text */
   --fk-text-dim: #9ca3af;                 /* secondary text (site gray-400) */
-  --fk-text-faint: rgba(255, 255, 255, 0.35); /* de-emphasized nav text */
+  --fk-text-faint: rgba(255, 255, 255, 0.46); /* de-emphasized nav text;
+    alpha floor: 4.63:1 over the header band at rest (WCAG 4.5:1 at 13px;
+    content scrolled under the translucent band can composite lower) */
 
   /* --- Color: accent (neon orange) --- */
   --fk-accent: #FF8800;
   --fk-accent-deep: #994400;
   --fk-accent-rgb: 255, 136, 0;           /* for rgba() composition */
-  --fk-accent-dim: rgba(255, 136, 0, 0.7);   /* chip text */
-  --fk-accent-faint: rgba(255, 136, 0, 0.35); /* footer / maker's-mark text */
+  --fk-accent-dim: rgba(255, 136, 0, 0.73);  /* chip text;
+    alpha floor: >=4.55:1 over every dark backdrop chips ship on
+    (--fk-chip-bg on page, .fk-card, card tint, #0d0b0a panels;
+    WCAG 4.5:1 at 12px) */
+  --fk-accent-faint: rgba(255, 136, 0, 0.71); /* footer / maker's-mark text;
+    alpha floor: 4.59:1 over --fk-surface, 4.64:1 over --fk-bg
+    (WCAG 4.5:1 at 13px) */
 
   /* --- Borders --- */
   --fk-border-neutral: rgba(255, 255, 255, 0.06); /* resting card border */

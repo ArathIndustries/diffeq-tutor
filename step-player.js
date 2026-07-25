@@ -111,6 +111,56 @@
     });
   }
 
+  /* --------------------------------------------------- keyboard routing */
+
+  /* One document-level keydown listener is shared by all mounted players,
+     so a page with several players never advances more than one per
+     keypress. Routing order for ArrowLeft/ArrowRight:
+       1. the player whose container contains the event target;
+       2. the "active" player — the last one whose container received a
+          pointerdown or focusin;
+       3. the first-mounted player.
+     The listener attaches when the first player registers and detaches
+     when the last one deregisters, so single-player pages keep today's
+     document-wide arrow behavior. */
+
+  var registry = [];      /* mounted player entries, in mount order */
+  var activeEntry = null; /* last entry activated by pointerdown/focusin */
+
+  function sharedOnKey(ev) {
+    if (ev.defaultPrevented || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    var t = ev.target;
+    if (t && (/^(input|textarea|select)$/i.test(t.tagName) || t.isContentEditable)) return;
+    if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+    var entry = null;
+    for (var i = 0; i < registry.length; i++) {
+      if (t && registry[i].containerEl.contains(t)) { entry = registry[i]; break; }
+    }
+    if (!entry) entry = activeEntry || registry[0];
+    if (!entry) return;
+    if (ev.key === "ArrowLeft") { entry.prev(); ev.preventDefault(); }
+    else { entry.next(); ev.preventDefault(); }
+  }
+
+  function registerEntry(entry) {
+    if (registry.length === 0) {
+      document.addEventListener("keydown", sharedOnKey);
+    }
+    registry.push(entry);
+  }
+
+  function deregisterEntry(entry) {
+    var i = registry.indexOf(entry);
+    if (i < 0) return;
+    registry.splice(i, 1);
+    if (activeEntry === entry) {
+      activeEntry = registry.length ? registry[0] : null;
+    }
+    if (registry.length === 0) {
+      document.removeEventListener("keydown", sharedOnKey);
+    }
+  }
+
   /* -------------------------------------------------------------- mount */
 
   function mount(containerEl, script, options) {
@@ -219,19 +269,23 @@
     prevBtn.addEventListener("click", prev);
     nextBtn.addEventListener("click", next);
 
-    function onKey(ev) {
-      if (ev.defaultPrevented || ev.altKey || ev.ctrlKey || ev.metaKey) return;
-      var t = ev.target;
-      if (t && (/^(input|textarea|select)$/i.test(t.tagName) || t.isContentEditable)) return;
-      if (ev.key === "ArrowLeft") { prev(); ev.preventDefault(); }
-      else if (ev.key === "ArrowRight") { next(); ev.preventDefault(); }
+    /* keyboard: register with the shared router; pointerdown/focusin on
+       the container marks this player as the active arrow-key recipient */
+    var entry = { containerEl: containerEl, next: next, prev: prev };
+
+    function onActivate() {
+      activeEntry = entry;
     }
-    document.addEventListener("keydown", onKey);
+    containerEl.addEventListener("pointerdown", onActivate);
+    containerEl.addEventListener("focusin", onActivate);
+    registerEntry(entry);
 
     function destroy() {
       if (destroyed) return;
       destroyed = true;
-      document.removeEventListener("keydown", onKey);
+      containerEl.removeEventListener("pointerdown", onActivate);
+      containerEl.removeEventListener("focusin", onActivate);
+      deregisterEntry(entry);
       containerEl.removeAttribute("data-fk-step-active");
       containerEl.classList.remove("fk-step-player");
       containerEl.innerHTML = "";
