@@ -581,7 +581,10 @@ function buildStepScript(problem) {
   };
 }
 
-// One walkthrough active at a time (the player binds document-wide arrow keys).
+// One walkthrough active at a time. Arrow keys go through FkStepPlayer's shared
+// document-level keydown router (attached while >=1 player is mounted; routes to
+// the player containing the event target, else the last pointerdown/focusin'd
+// player, else the first mounted). With one player mounted it gets all arrows.
 let activeWalkthrough = null;
 
 function exitWalkthrough() {

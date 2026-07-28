@@ -8,7 +8,7 @@
   --card: rgba(13, 11, 10, 0.6);       /* fk-card-bg */
   --border: rgba(255, 136, 0, 0.12);   /* fk-border-soft */
   --accent: #FF8800;                   /* fk-accent */
-  --accent2: rgba(255, 136, 0, 0.7);   /* fk-accent-dim (was purple) */
+  --accent2: var(--fk-accent-dim);     /* was purple; requires forged.css loaded */
   --green: #4ade80;
   --text: #e0e0e0;                     /* fk-text */
   --dim: #9ca3af;                      /* fk-text-dim */
