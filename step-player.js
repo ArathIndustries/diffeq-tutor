@@ -127,11 +127,40 @@
   var registry = [];      /* mounted player entries, in mount order */
   var activeEntry = null; /* last entry activated by pointerdown/focusin */
 
+  /* An entry is stale when its container has left the document — torn out
+     externally (e.g. a parent's innerHTML was replaced) without destroy().
+     Stale entries are evicted on every mount and on every routed keydown,
+     so a leaked entry can never shadow or keyboard-deaden live players.
+     destroy() remains the correct teardown (see PLAYER.md); the sweep is a
+     safety net, not an alternative. */
+  function isDisconnected(node) {
+    if (typeof node.isConnected === "boolean") return !node.isConnected;
+    var root = document.documentElement;
+    if (root && typeof root.contains === "function") return !root.contains(node);
+    return false; /* connectivity undeterminable: never evict a maybe-live player */
+  }
+
+  /* Evict stale entries, plus any entry mounted on replacedContainer —
+     a second mount into the same container supersedes the first for
+     keyboard routing (the first mount's chrome is gone either way). */
+  function sweepRegistry(replacedContainer) {
+    for (var i = registry.length - 1; i >= 0; i--) {
+      var e = registry[i];
+      if (e.containerEl === replacedContainer || isDisconnected(e.containerEl)) {
+        deregisterEntry(e);
+      }
+    }
+  }
+
   function sharedOnKey(ev) {
     if (ev.defaultPrevented || ev.altKey || ev.ctrlKey || ev.metaKey) return;
     var t = ev.target;
     if (t && (/^(input|textarea|select)$/i.test(t.tagName) || t.isContentEditable)) return;
     if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+    sweepRegistry(null);
+    /* never route to an entry that is no longer registered (evicted above,
+       or a mount that failed mid-way and never registered) */
+    if (activeEntry && registry.indexOf(activeEntry) < 0) activeEntry = null;
     var entry = null;
     for (var i = 0; i < registry.length; i++) {
       if (t && registry[i].containerEl.contains(t)) { entry = registry[i]; break; }
@@ -278,6 +307,7 @@
     }
     containerEl.addEventListener("pointerdown", onActivate);
     containerEl.addEventListener("focusin", onActivate);
+    sweepRegistry(containerEl);
     registerEntry(entry);
 
     function destroy() {
